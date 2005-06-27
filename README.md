@@ -2,6 +2,7 @@
 
 A DIY motion-triggered surveillance system using Raspberry Pi and NodeMCU. This project captures video/images on motion detection, uploads to AWS or your local server, and provides a web interface using Flask.
 
+
 ## 🚀 Features
 - 🎥 Motion-triggered video/image capture
 - 🌐 Flask web interface to control and monitor
