@@ -25,11 +25,13 @@ while True:
     h264_path = f"/home/pi/Desktop/{timestamp}.h264"
     mp4_path = f"/home/pi/Desktop/{timestamp}.mp4"
 
-    # Start recording using FileOutput
+    from picamera2.outputs import FileOutput  # Make sure this is imported
+
     file_output = FileOutput(h264_path)
     picam2.start_recording(file_output)
     pir.wait_for_no_motion()
     picam2.stop_recording()
+
     print("Motion ended. Recording stopped.")
 
     # Convert to MP4
