@@ -28,7 +28,7 @@ while True:
     from picamera2.outputs import FileOutput
 
     file_output = FileOutput(h264_path)
-    picam2.start_recording(picam2.encoder, file_output)
+    picam2.start_recording(picam2.encoders, file_output)
 
     pir.wait_for_no_motion()
     picam2.stop_recording()
