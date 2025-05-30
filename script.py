@@ -19,12 +19,12 @@ encoder = H264Encoder()
 time.sleep(2)
 last_frame = None
 recording = False
-
+i = 0
 while True:
     frame = picam2.capture_array()
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     gray = cv2.GaussianBlur(gray, (21, 21), 0)
-
+    print("started",i+=1)
     if last_frame is None:
         last_frame = gray
         continue
@@ -52,7 +52,7 @@ while True:
 
         picam2.stop_recording()
         recording = False
-        print("Recording complete. Converting to MP4...")
+        print("Recording complete.")
 
 
     last_frame = gray
