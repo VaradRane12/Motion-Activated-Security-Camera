@@ -43,8 +43,6 @@ while True:
         # Generate file paths
         timestamp = datetime.now().strftime("%y%b%d_%H-%M-%S")
         h264_path = f"/home/pi/Desktop/{timestamp}.h264"
-        mp4_path = f"/home/pi/Desktop/{timestamp}.mp4"
-
         output = FileOutput(h264_path)
         picam2.start_recording(encoder, output)
         recording = True
@@ -56,13 +54,6 @@ while True:
         recording = False
         print("Recording complete. Converting to MP4...")
 
-        # Convert to MP4 using MP4Box (you must have this installed)
-        result = os.system(f"MP4Box -add {h264_path} {mp4_path}")
-        if result == 0:
-            os.remove(h264_path)
-            print(f"Saved video: {mp4_path}")
-        else:
-            print("MP4 conversion failed. Keeping .h264 file.")
 
     last_frame = gray
     time.sleep(0.1)
