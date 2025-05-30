@@ -27,8 +27,7 @@ motion_threshold_area = 1000
 while True:
     print("start")
     print(recording)
-
-        frame = picam2.capture_array()
+    frame = picam2.capture_array()
     print(recording)
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     gray = cv2.GaussianBlur(gray, (21, 21), 0)
