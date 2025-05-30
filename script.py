@@ -19,18 +19,17 @@ last_frame = None
 recording = False
 record_start_time = 0
 record_duration = 5  # seconds
-
-cooldown = 1
+cooldown_after_recording = 3  # seconds
 last_motion_time = 0
+
+motion_threshold_area = 1000
 
 while True:
     frame = picam2.capture_array()
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     gray = cv2.GaussianBlur(gray, (21, 21), 0)
-
     current_time = time.time()
 
-    # Always update last_frame to keep detection fresh
     if not recording:
         if last_frame is None:
             last_frame = gray
@@ -41,11 +40,10 @@ while True:
         thresh = cv2.dilate(thresh, None, iterations=2)
         contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
-        motion_detected = any(cv2.contourArea(c) > 1000 for c in contours)
+        motion_detected = any(cv2.contourArea(c) > motion_threshold_area for c in contours)
 
-        if motion_detected and (current_time - last_motion_time > cooldown):
+        if motion_detected and (current_time - last_motion_time) > cooldown_after_recording:
             print("Motion Detected! Starting recording...")
-
             timestamp = datetime.now().strftime("%y%b%d_%H-%M-%S")
             h264_path = f"/home/pi/Desktop/{timestamp}.h264"
             output = FileOutput(h264_path)
@@ -55,16 +53,13 @@ while True:
             record_start_time = current_time
             last_motion_time = current_time
         else:
-            # Update baseline frame only if not detecting motion
-            last_frame = gray
-
+            last_frame = gray  # keep updating baseline frame if no motion
     else:
-        # We're recording
+        # Still recording
         if current_time - record_start_time >= record_duration:
             picam2.stop_recording()
             recording = False
             print("Recording complete.")
-            # After recording ends, update last_frame to current view
-            last_frame = gray
+            last_frame = None  # Reset frame so it doesn't use old one
 
     time.sleep(0.1)
