@@ -24,7 +24,8 @@ while True:
     frame = picam2.capture_array()
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     gray = cv2.GaussianBlur(gray, (21, 21), 0)
-    print("started",i+=1)
+    print("started",i)
+    i+=1
     if last_frame is None:
         last_frame = gray
         continue
