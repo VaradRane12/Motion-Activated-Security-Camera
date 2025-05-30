@@ -48,7 +48,7 @@ while True:
             h264_path = f"/home/pi/Desktop/{timestamp}.h264"
             output = FileOutput(h264_path)
 
-            picam2.start_recording(encoder, output)
+            # picam2.start_recording(encoder, output)
             recording = True
             record_start_time = current_time
             last_motion_time = current_time
@@ -57,9 +57,10 @@ while True:
     else:
         # Still recording
         if current_time - record_start_time >= record_duration:
-            picam2.stop_recording()
+            # picam2.stop_recording()
             recording = False
             print("Recording complete.")
             last_frame = None  # Reset frame so it doesn't use old one
+    print("out of hte stop recording")
 
     time.sleep(0.1)
