@@ -20,12 +20,19 @@ time.sleep(2)
 last_frame = None
 recording = False
 i = 0
+
+# Motion recording cooldown (in seconds)
+cooldown = 10
+last_motion_time = 0
+
 while True:
     frame = picam2.capture_array()
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     gray = cv2.GaussianBlur(gray, (21, 21), 0)
-    print("started",i)
-    i+=1
+    
+    print("started", i)
+    i += 1
+
     if last_frame is None:
         last_frame = gray
         continue
@@ -38,23 +45,35 @@ while True:
 
     motion_detected = any(cv2.contourArea(c) > 1000 for c in contours)
 
-    if motion_detected and not recording:
+    # Optional live preview
+    cv2.imshow("Security Feed", frame)
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+        break
+
+    # If motion is detected, not already recording, and cooldown passed
+    if motion_detected and not recording and (time.time() - last_motion_time > cooldown):
         print("Motion Detected! Starting recording...")
 
-        # Generate file paths
+        # Generate file path
         timestamp = datetime.now().strftime("%y%b%d_%H-%M-%S")
         h264_path = f"/home/pi/Desktop/{timestamp}.h264"
         output = FileOutput(h264_path)
+
         picam2.start_recording(encoder, output)
         recording = True
+        last_motion_time = time.time()
 
-        # Wait 5 seconds
+        # Record for 5 seconds
         time.sleep(5)
 
         picam2.stop_recording()
         recording = False
         print("Recording complete.")
 
+    # Update last frame only when no motion
+    if not motion_detected:
+        last_frame = gray
 
-    last_frame = gray
     time.sleep(0.1)
+
+cv2.destroyAllWindows()  # If you're using imshow
