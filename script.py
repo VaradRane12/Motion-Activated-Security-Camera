@@ -25,12 +25,17 @@ last_motion_time = 0
 motion_threshold_area = 1000
 
 while True:
-    frame = picam2.capture_array()
+    print("start")
+    print(recording)
+
+        frame = picam2.capture_array()
+    print(recording)
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     gray = cv2.GaussianBlur(gray, (21, 21), 0)
     current_time = time.time()
-
+    
     if not recording:
+        print("In if")
         if last_frame is None:
             last_frame = gray
             continue
@@ -48,7 +53,7 @@ while True:
             h264_path = f"/home/pi/Desktop/{timestamp}.h264"
             output = FileOutput(h264_path)
 
-            # picam2.start_recording(encoder, output)
+            picam2.start_recording(encoder, output)
             recording = True
             record_start_time = current_time
             last_motion_time = current_time
@@ -57,7 +62,7 @@ while True:
     else:
         # Still recording
         if current_time - record_start_time >= record_duration:
-            # picam2.stop_recording()
+            picam2.stop_recording()
             recording = False
             print("Recording complete.")
             last_frame = None  # Reset frame so it doesn't use old one
