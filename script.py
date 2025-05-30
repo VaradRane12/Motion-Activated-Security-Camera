@@ -5,26 +5,26 @@ from picamera2 import Picamera2
 from picamera2.encoders import H264Encoder
 from picamera2.outputs import FileOutput
 from libcamera import Transform
-
-picam2 = Picamera2()
-video_config = picam2.create_video_configuration(
-    main={"size": (640, 480)}, transform=Transform(hflip=1, vflip=1))
-picam2.configure(video_config)
-picam2.start()
-
-encoder = H264Encoder()
-
-time.sleep(2)
-last_frame = None
-recording = False
-record_start_time = 0
-record_duration = 5  # seconds
-cooldown_after_recording = 3  # seconds
-last_motion_time = 0
-
-motion_threshold_area = 1000
-
 while True:
+
+    picam2 = Picamera2()
+    video_config = picam2.create_video_configuration(
+        main={"size": (640, 480)}, transform=Transform(hflip=1, vflip=1))
+    picam2.configure(video_config)
+    picam2.start()
+
+    encoder = H264Encoder()
+
+    time.sleep(2)
+    last_frame = None
+    recording = False
+    record_start_time = 0
+    record_duration = 5  # seconds
+    cooldown_after_recording = 3  # seconds
+    last_motion_time = 0
+
+    motion_threshold_area = 1000
+
     print("start")
     print(recording)
     frame = picam2.capture_array()
