@@ -39,9 +39,9 @@ while True:
         thresh = cv2.threshold(frame_delta, 25, 255, cv2.THRESH_BINARY)[1]
         thresh = cv2.dilate(thresh, None, iterations=2)
         contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-
+        print("detecting motion")
         motion_detected = any(cv2.contourArea(c) > motion_threshold_area for c in contours)
-
+        print("this is after the motion detection")
         if motion_detected and (current_time - last_motion_time) > cooldown_after_recording:
             print("Motion Detected! Starting recording...")
             timestamp = datetime.now().strftime("%y%b%d_%H-%M-%S")
