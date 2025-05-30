@@ -46,9 +46,9 @@ while True:
     motion_detected = any(cv2.contourArea(c) > 1000 for c in contours)
 
     # Optional live preview
-    cv2.imshow("Security Feed", frame)
-    if cv2.waitKey(1) & 0xFF == ord('q'):
-        break
+    # cv2.imshow("Security Feed", frame)
+    # if cv2.waitKey(1) & 0xFF == ord('q'):
+    #     break
 
     # If motion is detected, not already recording, and cooldown passed
     if motion_detected and not recording and (time.time() - last_motion_time > cooldown):
@@ -76,4 +76,4 @@ while True:
 
     time.sleep(0.1)
 
-cv2.destroyAllWindows()  # If you're using imshow
+# cv2.destroyAllWindows()  # If you're using imshow
