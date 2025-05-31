@@ -80,7 +80,7 @@ while True:
         picam2.stop_recording()
         print("Recording done.")
 
-
+        
 
         # Upload to S3
         bucket_name = "motion-camera-storage"
