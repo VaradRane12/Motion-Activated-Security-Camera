@@ -6,9 +6,9 @@ from picamera2 import Picamera2
 from picamera2.encoders import H264Encoder
 from picamera2.outputs import FileOutput
 from libcamera import Transform
-
+import boto3
 picam2 = Picamera2()
-
+s3_client = boto3.client("s3")
 
 # Configuration for motion detection
 motion_config = picam2.create_video_configuration(
@@ -79,6 +79,9 @@ while True:
         time.sleep(record_duration)
         picam2.stop_recording()
         print("Recording done.")
+
+
+
         # Upload to S3
         bucket_name = "motion-camera-storage"
         s3_key = f"motion_videos/{timestamp}.h264"
