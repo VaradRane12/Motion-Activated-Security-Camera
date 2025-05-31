@@ -28,6 +28,7 @@ def get_video_files():
     videos = []
 
     if 'Contents' in response:
+        print(response["Contents"])
         for obj in response['Contents']:
             key = obj['Key']
             if key.endswith(".mp4"):
@@ -47,4 +48,3 @@ def index():
 
 if __name__ == "__main__":
     app.run(debug=True)
-    
