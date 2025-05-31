@@ -80,14 +80,24 @@ while True:
         picam2.stop_recording()
         print("Recording done.")
 
-        
+        import subprocess
+
+        mp4_path = h264_path.replace(".h264", ".mp4")
+
+        # Convert .h264 to .mp4 using ffmpeg
+        subprocess.run([
+            "ffmpeg", "-y", "-framerate", "15", "-i", h264_path, "-c:v", "copy", mp4_path
+        ], check=True)
+
+        print(f"Conversion done: {mp4_path}")
+
 
         # Upload to S3
         bucket_name = "motion-camera-storage"
-        s3_key = f"motion_videos/{timestamp}.h264"
+        s3_key = f"motion_videos/{timestamp}.mp4"
 
         try:
-            s3_client.upload_file(h264_path, bucket_name, s3_key)
+            s3_client.upload_file(mp4_path, bucket_name, s3_key)
             print(f"Uploaded to S3: s3://{bucket_name}/{s3_key}")
         except Exception as e:
             print(f"Failed to upload to S3: {e}")
