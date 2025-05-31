@@ -7,6 +7,8 @@ from picamera2.encoders import H264Encoder
 from picamera2.outputs import FileOutput
 from libcamera import Transform
 
+picam2 = Picamera2()
+
 
 # Configuration for motion detection
 motion_config = picam2.create_video_configuration(
