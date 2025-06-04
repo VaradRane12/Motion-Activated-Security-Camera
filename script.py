@@ -33,7 +33,7 @@ encoder = H264Encoder()
 
 last_frame = None
 recording = False
-record_duration = 5
+record_duration = 20
 cooldown_after_recording = 3
 last_motion_time = 0
 motion_threshold_area = 1000
@@ -68,17 +68,23 @@ while True:
 
         # Stop motion detection stream
         picam2.stop()
-        time.sleep(0.2)  # Let camera reset
+        time.sleep(1)  # Let camera reset
 
         # Switch to recording config
         picam2.configure(record_config)
         picam2.start()
-        time.sleep(0.2)
-
+        time.sleep(1)
+        print("Starting recording...")
         picam2.start_recording(encoder, output)
-        time.sleep(record_duration)
+        start_time = time.time()
+
+        while time.time() - start_time < record_duration:
+            print(f"Recording... {int(time.time() - start_time)}s", end='\r')
+            time.sleep(1)
+
         picam2.stop_recording()
         print("Recording done.")
+
 
         import subprocess
 
@@ -86,8 +92,9 @@ while True:
 
         # Convert .h264 to .mp4 using ffmpeg
         subprocess.run([
-            "ffmpeg", "-y", "-framerate", "15", "-i", h264_path, "-c:v", "copy", mp4_path
+            "ffmpeg", "-y", "-r", "15", "-i", h264_path, "-c:v", "copy", mp4_path
         ], check=True)
+
 
         print(f"Conversion done: {mp4_path}")
 
@@ -105,10 +112,10 @@ while True:
 
         # Reset to motion detection stream
         picam2.stop()
-        time.sleep(0.2)
+        time.sleep(1)
         picam2.configure(motion_config)
         picam2.start()
-        time.sleep(0.2)
+        time.sleep(1)
 
         last_frame = None
         last_motion_time = time.time()
