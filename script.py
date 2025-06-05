@@ -31,24 +31,26 @@ record_config = picam2.create_video_configuration(
 )
 
 # Function to handle conversion and S3 upload in a separate thread
+import threading
+
 def convert_and_upload(h264_path, timestamp):
+    print(f"[THREAD-{threading.get_ident()}] Starting conversion and upload...")
     try:
         mp4_path = h264_path.replace(".h264", ".mp4")
 
-        # Convert .h264 to .mp4 using ffmpeg
         subprocess.run([
             "ffmpeg", "-y", "-r", "15", "-i", h264_path, "-c:v", "copy", mp4_path
         ], check=True)
-        print(f"Conversion done: {mp4_path}")
+        print(f"[THREAD-{threading.get_ident()}] Conversion done: {mp4_path}")
 
-        # Upload to S3
         bucket_name = "motion-camera-storage"
         s3_key = f"motion_videos/{timestamp}.mp4"
         s3_client.upload_file(mp4_path, bucket_name, s3_key)
-        print(f"Uploaded to S3: s3://{bucket_name}/{s3_key}")
+        print(f"[THREAD-{threading.get_ident()}] Uploaded to S3: s3://{bucket_name}/{s3_key}")
 
     except Exception as e:
-        print(f"Error in conversion/upload thread: {e}")
+        print(f"[THREAD-{threading.get_ident()}] Error: {e}")
+
 
 # Start motion detection
 picam2.configure(motion_config)
