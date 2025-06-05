@@ -5,11 +5,35 @@ import numpy as np
 import subprocess
 import threading
 import boto3
-
+import RPi.GPIO as GPIO
 from picamera2 import Picamera2
 from picamera2.encoders import H264Encoder
 from picamera2.outputs import FileOutput
 from libcamera import Transform
+
+
+
+LED_PIN = 17  # BCM numbering (Pin 11)
+GPIO.setmode(GPIO.BCM)
+GPIO.setup(LED_PIN, GPIO.OUT)
+
+def led_Blink(pin):
+    try:
+        timeout = 10
+        while time.time() < start_time + timeout:
+
+            GPIO.output(LED_PIN, GPIO.HIGH)  # Turn on
+            print("LED ON")
+            time.sleep(0.2)
+
+            GPIO.output(LED_PIN, GPIO.LOW)   # Turn off
+            print("LED OFF")
+            time.sleep(0.2)
+    except:
+        return
+
+    finally:
+        GPIO.cleanup()
 
 # Initialize camera and AWS S3
 picam2 = Picamera2()
@@ -86,6 +110,7 @@ while True:
     motion_detected = any(cv2.contourArea(c) > motion_threshold_area for c in contours)
 
     if motion_detected and (current_time - last_motion_time) > cooldown_after_recording:
+
         print("Motion detected. Starting recording...")
         timestamp = datetime.now().strftime("%y%b%d_%H-%M-%S")
         h264_path = f"/home/pi/Desktop/{timestamp}.h264"
@@ -116,7 +141,7 @@ while True:
 
         # Reset to motion detection stream
         picam2.stop()
-        time.sleep(0.025)
+        time.sleep(0.025) 
         picam2.configure(motion_config)
         picam2.start()
         time.sleep(0.025)
