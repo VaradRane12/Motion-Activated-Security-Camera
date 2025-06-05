@@ -39,7 +39,6 @@ last_motion_time = 0
 motion_threshold_area = 1000
 
 while True:
-    # Motion detection stream
     yuv_buffer = picam2.capture_buffer("lores")
     yuv = np.frombuffer(yuv_buffer, dtype=np.uint8)
     yuv = yuv.reshape((240 * 3 // 2, 320))  # YUV420 = 1.5 bytes per pixel
@@ -68,12 +67,12 @@ while True:
 
         # Stop motion detection stream
         picam2.stop()
-        time.sleep(1)  # Let camera reset
+        time.sleep(0.2)  # Let camera reset
 
         # Switch to recording config
         picam2.configure(record_config)
         picam2.start()
-        time.sleep(1)
+        time.sleep(0.2)
         print("Starting recording...")
         picam2.start_recording(encoder, output)
         start_time = time.time()
