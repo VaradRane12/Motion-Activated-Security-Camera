@@ -20,6 +20,7 @@ GPIO.output(LED_PIN, GPIO.LOW)
 
 def led_Blink(pin):
     try:
+        start_time = time.time()
         timeout = 10
         while time.time() < start_time + timeout:
 
@@ -32,10 +33,6 @@ def led_Blink(pin):
             time.sleep(0.2)
     except:
         return
-
-    finally:
-        GPIO.cleanup()
-
 # Initialize camera and AWS S3
 picam2 = Picamera2()
 s3_client = boto3.client("s3")
@@ -155,3 +152,4 @@ while True:
         last_frame = gray
 
     time.sleep(0.1)
+GPIO.cleanup()
