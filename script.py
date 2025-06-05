@@ -20,7 +20,7 @@ motion_config = picam2.create_video_configuration(
 
 # Configuration for recording (higher res, no lores needed)
 record_config = picam2.create_video_configuration(
-    main={"size": (640, 480), "format": "RGB888"},
+    main={"size": (1920, 1080), "format": "RGB888"},
     transform=Transform(hflip=1, vflip=1),
     controls={"FrameRate": 15}
 )
@@ -61,7 +61,7 @@ while True:
     motion_detected = any(cv2.contourArea(c) > motion_threshold_area for c in contours)
 
     if motion_detected and (current_time - last_motion_time) > cooldown_after_recording:
-        print("?? Motion detected. Starting recording...")
+        print("Motion detected. Starting recording...")
         timestamp = datetime.now().strftime("%y%b%d_%H-%M-%S")
         h264_path = f"/home/pi/Desktop/{timestamp}.h264"
         output = FileOutput(h264_path)
