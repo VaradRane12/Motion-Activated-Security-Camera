@@ -67,7 +67,7 @@ motion_threshold_area = 1000
 while True:
     yuv_buffer = picam2.capture_buffer("lores")
     yuv = np.frombuffer(yuv_buffer, dtype=np.uint8)
-    yuv = yuv.reshape((240 * 3 // 2, 320))  # YUV420 = 1.5 bytes per pixel
+    yuv = yuv.reshape((240 * 3 // 2, 320))
     frame = cv2.cvtColor(yuv, cv2.COLOR_YUV2BGR_I420)
 
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
@@ -116,10 +116,10 @@ while True:
 
         # Reset to motion detection stream
         picam2.stop()
-        time.sleep(1)
+        time.sleep(0.025)
         picam2.configure(motion_config)
         picam2.start()
-        time.sleep(1)
+        time.sleep(0.025)
 
         last_frame = None
         last_motion_time = time.time()
