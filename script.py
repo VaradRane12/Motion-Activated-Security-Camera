@@ -67,12 +67,10 @@ while True:
 
         # Stop motion detection stream
         picam2.stop()
-        time.sleep(0.2)  # Let camera reset
 
         # Switch to recording config
         picam2.configure(record_config)
         picam2.start()
-        time.sleep(0.2)
         print("Starting recording...")
         picam2.start_recording(encoder, output)
         start_time = time.time()
