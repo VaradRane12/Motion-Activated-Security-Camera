@@ -16,6 +16,7 @@ from libcamera import Transform
 LED_PIN = 17  # BCM numbering (Pin 11)
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(LED_PIN, GPIO.OUT)
+GPIO.output(LED_PIN, GPIO.LOW)
 
 def led_Blink(pin):
     try:
@@ -110,7 +111,8 @@ while True:
     motion_detected = any(cv2.contourArea(c) > motion_threshold_area for c in contours)
 
     if motion_detected and (current_time - last_motion_time) > cooldown_after_recording:
-
+        led_thread = threading.Thread(target=led_Blink, args=(LED_PIN))
+        led_thread.start()
         print("Motion detected. Starting recording...")
         timestamp = datetime.now().strftime("%y%b%d_%H-%M-%S")
         h264_path = f"/home/pi/Desktop/{timestamp}.h264"
