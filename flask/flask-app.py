@@ -1,6 +1,6 @@
 import os
 import boto3
-from flask import Flask, render_template
+from flask import Flask, render_template, request, jsonify
 from dotenv import load_dotenv
 
 # Load .env variables
@@ -28,16 +28,33 @@ def get_video_files():
     videos = []
 
     if 'Contents' in response:
-        print(response["Contents"])
+        # First, filter and collect video objects with their metadata
+        video_objects = []
         for obj in response['Contents']:
             key = obj['Key']
             if key.endswith(".mp4"):
-                presigned_url = s3_client.generate_presigned_url(
-                    'get_object',
-                    Params={'Bucket': S3_BUCKET, 'Key': key},
-                    ExpiresIn=3600  # 1 hour
-                )
-                videos.append({'name': key, 'url': presigned_url})
+                video_objects.append(obj)
+        
+        # Sort video objects by LastModified date (newest first)
+        video_objects.sort(key=lambda x: x['LastModified'], reverse=True)
+        
+        # Generate presigned URLs for sorted videos
+        for obj in video_objects:
+            key = obj['Key']
+            presigned_url = s3_client.generate_presigned_url(
+                'get_object',
+                Params={'Bucket': S3_BUCKET, 'Key': key},
+                ExpiresIn=3600  # 1 hour
+            )
+            # Extract filename from key for display
+            filename = key.split('/')[-1] if '/' in key else key
+            videos.append({
+                'name': filename,
+                'full_key': key,
+                'url': presigned_url,
+                'last_modified': obj['LastModified'],
+                'size': obj['Size']
+            })
     
     return videos
 
@@ -46,5 +63,28 @@ def index():
     videos = get_video_files()
     return render_template("index.html", videos=videos)
 
+@app.route("/live_feed")
+def live_feed():
+    # Implement your live feed logic here
+    return jsonify({"status": "Live feed activated", "message": "Connecting to live stream..."})
+
+@app.route("/shutdown", methods=["POST"])
+def shutdown():
+    # Implement shutdown logic here
+    print("Shutdown requested")
+    return jsonify({"status": "Shutdown initiated", "message": "System shutting down safely..."})
+
+@app.route("/arm_light", methods=["POST"])
+def arm_light():
+    # Implement light arming logic here 
+    print("Light armed")
+    return jsonify({"status": "Light armed", "message": "Motion detection light activated"})
+
+@app.route("/arm_siren", methods=["POST"])
+def arm_siren():
+    # Implement siren arming logic here
+    print("Siren armed")
+    return jsonify({"status": "Siren armed", "message": "Motion detection siren activated"})
+
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=8000)
+    app.run(host='0.0.0.0', port=8000, debug=True)

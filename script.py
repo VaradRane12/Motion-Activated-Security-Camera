@@ -152,4 +152,3 @@ while True:
         last_frame = gray
 
     time.sleep(0.1)
-GPIO.cleanup()
