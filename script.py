@@ -1,3 +1,4 @@
+import shutil
 import cv2
 import os
 import time
@@ -17,7 +18,7 @@ import glob
 LED_PIN = 17  # BCM numbering (Pin 11)
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(LED_PIN, GPIO.OUT)
-GPIO.output(LED_PIN, GPIO.LOW)
+GPIO.output(LED_PIN, GPIO.HIGH)
 
 def led_Blink(pin):
     try:
@@ -32,6 +33,8 @@ def led_Blink(pin):
             GPIO.output(LED_PIN, GPIO.LOW)   # Turn off
             print("LED OFF")
             time.sleep(0.2)
+        GPIO.output(LED_PIN, GPIO.HIGH)
+
     except:
         return
 # Initialize camera and AWS S3
@@ -57,12 +60,9 @@ record_config = picam2.create_video_configuration(
 import threading
 
 def convert_and_upload(h264_path, timestamp):
-
-
-    
-
+    bucket_name = "motion-camera-storage"
     print(f"[THREAD-{threading.get_ident()}] Starting conversion and upload...")
-    try:
+    try: #try for conversion
         mp4_path = h264_path.replace(".h264", ".mp4")
 
         subprocess.run([
@@ -75,31 +75,45 @@ def convert_and_upload(h264_path, timestamp):
                 print(f"Deleted: {file}")
             except Exception as e:
                 print(f"Error deleting {file}: {e}")
-        bucket_name = "motion-camera-storage"
-
+    except:
+        pass  # Replace with logging
+        
         #DELETING OLD FILES
-        response = s3_client.list_objects_v2(Bucket=bucket_name, Prefix="motion_videos/")
-        if 'Contents' in response and len(response['Contents']) > 16:
-            sorted_files = sorted(response['Contents'], key=lambda x: x['LastModified'])
-            to_delete = len(sorted_files) - 15
-            nuke_list = sorted_files[:to_delete]  # Oldest ones
-            for obj in nuke_list:
-                s3_client.delete_object(Bucket=bucket_name, Key=obj['Key'])
-                print(f"Deleted: {obj['Key']}")
+        try: #Delete Try
+            response = s3_client.list_objects_v2(Bucket=bucket_name, Prefix="motion_videos/")
+            if 'Contents' in response and len(response['Contents']) > 16:
+                sorted_files = sorted(response['Contents'], key=lambda x: x['LastModified'])
+                to_delete = len(sorted_files) - 15
+                nuke_list = sorted_files[:to_delete]  # Oldest ones
+                for obj in nuke_list:
+                    s3_client.delete_object(Bucket=bucket_name, Key=obj['Key'])
+                    print(f"Deleted: {obj['Key']}")
+        except:
+            pass
 
         else:
             print("No files deleted. Less than or equal to 16 objects present.")
+    try:  # uploading previously failed videos
+        for file in glob.glob("../Desktop/offline_storage/*.mp4"):
+            s3_key = f"motion_videos/{os.path.basename(file)}"
+            s3_client.upload_file(file, bucket_name, s3_key)
+            os.remove(file)
+            print(f"[THREAD-{threading.get_ident()}] Uploaded from offline: s3://{bucket_name}/{s3_key}")
 
-
-
-
+        # uploading the current video
         s3_key = f"motion_videos/{timestamp}.mp4"
         s3_client.upload_file(mp4_path, bucket_name, s3_key)
         os.remove(mp4_path)
         print(f"[THREAD-{threading.get_ident()}] Uploaded to S3: s3://{bucket_name}/{s3_key}")
 
     except Exception as e:
-        print(f"[THREAD-{threading.get_ident()}] Error: {e}")
+        offline_path = f"../Desktop/offline_storage/{timestamp}.mp4"
+        shutil.move(mp4_path, offline_path)
+        print(f"[THREAD-{threading.get_ident()}] S3 upload failed, stored locally at: {offline_path}")
+        print(f"Error: {e}")
+
+    # except Exception as e:
+    #     print(f"[THREAD-{threading.get_ident()}] Error: {e}")
 
 
 # Start motion detection
