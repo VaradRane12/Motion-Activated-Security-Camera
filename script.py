@@ -11,7 +11,7 @@ from picamera2 import Picamera2
 from picamera2.encoders import H264Encoder
 from picamera2.outputs import FileOutput
 from libcamera import Transform
-
+import glob
 
 
 LED_PIN = 17  # BCM numbering (Pin 11)
@@ -57,6 +57,15 @@ record_config = picam2.create_video_configuration(
 import threading
 
 def convert_and_upload(h264_path, timestamp):
+
+
+    for file in glob.glob("Desktop/*.h264"):
+        try:
+            os.remove(file)
+            print(f"Deleted: {file}")
+        except Exception as e:
+            print(f"Error deleting {file}: {e}")
+
     print(f"[THREAD-{threading.get_ident()}] Starting conversion and upload...")
     try:
         mp4_path = h264_path.replace(".h264", ".mp4")
@@ -156,7 +165,7 @@ while True:
         # Start the thread for conversion + upload
         upload_thread = threading.Thread(target=convert_and_upload, args=(h264_path, timestamp))
         upload_thread.start()
-        os.remove(h264_path)
+        
         # Reset to motion detection stream
         picam2.stop()
         time.sleep(0.025) 
