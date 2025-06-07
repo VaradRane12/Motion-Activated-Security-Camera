@@ -67,6 +67,8 @@ def convert_and_upload(h264_path, timestamp):
         print(f"[THREAD-{threading.get_ident()}] Conversion done: {mp4_path}")
 
         bucket_name = "motion-camera-storage"
+        response = s3_client.list_objects_v2(Bucket=bucket_name, Prefix="motion_videos/")
+        print(response["Contents"])
         s3_key = f"motion_videos/{timestamp}.mp4"
         s3_client.upload_file(mp4_path, bucket_name, s3_key)
         os.remove(mp4_path)
