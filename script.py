@@ -19,7 +19,12 @@ LED_PIN = 17  # BCM numbering (Pin 11)
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(LED_PIN, GPIO.OUT)
 GPIO.output(LED_PIN, GPIO.HIGH)
-
+for file in glob.glob("../Desktop/*.h264"):
+    try:
+        os.remove(file)
+        print(f"Deleted: {file}")
+    except Exception as e:
+        print(f"Error deleting {file}: {e}")
 def led_Blink(pin):
     try:
         start_time = time.time()
@@ -69,12 +74,7 @@ def convert_and_upload(h264_path, timestamp):
             "ffmpeg", "-y", "-r", "15", "-i", h264_path, "-c:v", "copy", mp4_path
         ], check=True)
         print(f"[THREAD-{threading.get_ident()}] Conversion done: {mp4_path}")
-        for file in glob.glob("../Desktop/*.h264"):
-            try:
-                os.remove(file)
-                print(f"Deleted: {file}")
-            except Exception as e:
-                print(f"Error deleting {file}: {e}")
+
     except:
         pass  # Replace with logging
         
