@@ -59,7 +59,7 @@ import threading
 def convert_and_upload(h264_path, timestamp):
 
 
-    for file in glob.glob("Desktop/*.h264"):
+    for file in glob.glob("../Desktop/*.h264"):
         try:
             os.remove(file)
             print(f"Deleted: {file}")
