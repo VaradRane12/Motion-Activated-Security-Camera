@@ -59,12 +59,7 @@ import threading
 def convert_and_upload(h264_path, timestamp):
 
 
-    for file in glob.glob("../Desktop/*.h264"):
-        try:
-            os.remove(file)
-            print(f"Deleted: {file}")
-        except Exception as e:
-            print(f"Error deleting {file}: {e}")
+    
 
     print(f"[THREAD-{threading.get_ident()}] Starting conversion and upload...")
     try:
@@ -74,7 +69,12 @@ def convert_and_upload(h264_path, timestamp):
             "ffmpeg", "-y", "-r", "15", "-i", h264_path, "-c:v", "copy", mp4_path
         ], check=True)
         print(f"[THREAD-{threading.get_ident()}] Conversion done: {mp4_path}")
-
+        for file in glob.glob("../Desktop/*.h264"):
+            try:
+                os.remove(file)
+                print(f"Deleted: {file}")
+            except Exception as e:
+                print(f"Error deleting {file}: {e}")
         bucket_name = "motion-camera-storage"
 
         #DELETING OLD FILES
