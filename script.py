@@ -87,7 +87,6 @@ def convert_and_upload(h264_path, timestamp):
         s3_key = f"motion_videos/{timestamp}.mp4"
         s3_client.upload_file(mp4_path, bucket_name, s3_key)
         os.remove(mp4_path)
-        os.remove(h264_path)
         print(f"[THREAD-{threading.get_ident()}] Uploaded to S3: s3://{bucket_name}/{s3_key}")
 
     except Exception as e:
@@ -157,7 +156,7 @@ while True:
         # Start the thread for conversion + upload
         upload_thread = threading.Thread(target=convert_and_upload, args=(h264_path, timestamp))
         upload_thread.start()
-
+        os.remove(h264_path)
         # Reset to motion detection stream
         picam2.stop()
         time.sleep(0.025) 
