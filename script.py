@@ -81,7 +81,7 @@ def convert_and_upload(h264_path, timestamp):
         response = s3_client.list_objects_v2(Bucket=bucket_name, Prefix="motion_videos/")
         if 'Contents' in response and len(response['Contents']) > 16:
             sorted_files = sorted(response['Contents'], key=lambda x: x['LastModified'])
-            to_delete = len(sorted_files) - 16
+            to_delete = len(sorted_files) - 15
             nuke_list = sorted_files[:to_delete]  # Oldest ones
             for obj in nuke_list:
                 s3_client.delete_object(Bucket=bucket_name, Key=obj['Key'])
