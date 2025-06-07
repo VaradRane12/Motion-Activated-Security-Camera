@@ -123,7 +123,7 @@ time.sleep(2)
 
 encoder = H264Encoder()
 last_frame = None
-record_duration = 20
+record_duration = 120
 cooldown_after_recording = 3
 last_motion_time = 0
 motion_threshold_area = 1000
