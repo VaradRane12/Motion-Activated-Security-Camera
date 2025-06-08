@@ -119,7 +119,7 @@ def convert_and_upload(h264_path, timestamp):
                     s3_client.delete_object(Bucket=bucket_name, Key=obj['Key'])
                     print(f"Deleted: {obj['Key']}")
         except:
-            pass
+            print("Error in Deleting files on S3")
 
         else:
             print("No files deleted. Less than or equal to 16 objects present.")
@@ -137,7 +137,10 @@ def convert_and_upload(h264_path, timestamp):
         print(f"[THREAD-{threading.get_ident()}] Uploaded to S3: s3://{bucket_name}/{s3_key}")
 
     except Exception as e:
-        offline_path = f"../Desktop/offline_storage/{timestamp}.mp4"
+        home_dir = os.path.expanduser("~")
+        offline_dir = os.path.join(home_dir, "Desktop", "offline_storage")
+        os.makedirs(offline_dir, exist_ok=True)  # Create folder if missing
+        offline_path = os.path.join(offline_dir, f"{timestamp}.mp4")
         shutil.move(mp4_path, offline_path)
         print(f"[THREAD-{threading.get_ident()}] S3 upload failed, stored locally at: {offline_path}")
         print(f"Error: {e}")
@@ -153,7 +156,7 @@ time.sleep(2)
 
 encoder = H264Encoder()
 last_frame = None
-record_duration = 120
+record_duration = 60
 cooldown_after_recording = 3
 last_motion_time = 0
 motion_threshold_area = 1000
