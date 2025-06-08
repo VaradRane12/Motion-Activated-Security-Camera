@@ -42,12 +42,19 @@ LED_PIN = 17  # BCM numbering (Pin 11)
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(LED_PIN, GPIO.OUT)
 GPIO.output(LED_PIN, GPIO.HIGH)
-for file in glob.glob("../Desktop/*.h264"):
+
+
+
+home_dir = os.path.expanduser("~")
+desktop_path = os.path.join(home_dir, "Desktop")
+
+for file in glob.glob(os.path.join(desktop_path, "*.h264")):
     try:
         os.remove(file)
         print(f"Deleted: {file}")
     except Exception as e:
         print(f"Error deleting {file}: {e}")
+
 def led_Blink(pin):
     try:
         start_time = time.time()
