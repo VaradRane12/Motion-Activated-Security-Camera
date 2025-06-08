@@ -8,12 +8,35 @@ import subprocess
 import threading
 import boto3
 import RPi.GPIO as GPIO
-from picamera2 import Picamera2
+from picamera2 import Picamera2 
 from picamera2.encoders import H264Encoder
 from picamera2.outputs import FileOutput
 from libcamera import Transform
 import glob
 
+import logging
+import sys
+
+# Logging setup
+logger = logging.getLogger("MotionLogger")
+logger.setLevel(logging.DEBUG)
+
+log_path = "/home/pi/motion_logs.log"
+file_handler = logging.FileHandler(log_path)
+formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+file_handler.setFormatter(formatter)
+logger.addHandler(file_handler)
+
+# Redirect print and errors to logger
+class PrintLogger(object):
+    def write(self, message):
+        if message.strip():
+            logger.info(message.strip())
+    def flush(self):
+        pass
+
+sys.stdout = PrintLogger()
+sys.stderr = PrintLogger()
 
 LED_PIN = 17  # BCM numbering (Pin 11)
 GPIO.setmode(GPIO.BCM)
