@@ -258,19 +258,19 @@
                     Arm Siren
                 </button>
             </div>
-                        <div class="col-md-3 col-sm-6">
-                <button class="control-btn pauseBtn w-100" onclick="pauseSurveillance()">
-                    <i class="bi bi-lightbulb me-2"></i>
-                    Pause Surveillance
-                </button>
-            </div>
-                        </div>
-                        <div class="col-md-3 col-sm-6">
-                <button class="control-btn resumeBtn w-100" onclick="resumeSurveillance()">
-                    <i class="bi bi-lightbulb me-2"></i>
-                    Resume Surveillance
-                </button>
-            </div>
+<div class="col-md-3 col-sm-6">
+    <button id="pauseBtn" class="control-btn btn-arm-light w-100" onclick="pauseSurveillance()">
+        <i class="bi bi-pause-circle me-2"></i>
+        Pause Surveillance
+    </button>
+</div>
+<div class="col-md-3 col-sm-6">
+    <button id="resumeBtn" class="control-btn btn-arm-light w-100" onclick="resumeSurveillance()" style="display: none;">
+        <i class="bi bi-play-circle me-2"></i>
+        Resume Surveillance
+    </button>
+</div>
+
             <div class="col-md-3 col-sm-6">
                 <button class="control-btn btn-shutdown w-100" onclick="confirmShutdown()">
                     <i class="bi bi-power me-2"></i>
@@ -356,25 +356,32 @@
         }
     }
         function pauseSurveillance() {
-        // Send request to Flask backend (optional: use fetch)
-        showNotification('Surveillance paused', 'warning');
+    const pauseBtn = document.getElementById("pauseBtn");
+    const resumeBtn = document.getElementById("resumeBtn");
 
-        document.getElementById('pauseBtn').style.display = 'none';
-        document.getElementById('resumeBtn').style.display = 'block';
+    if (!pauseBtn || !resumeBtn) return;
 
-        // Optional: call an API like /pause to create the .flag file
-        fetch('/pause', { method: 'POST' });
-    }
+    pauseBtn.style.display = "none";
+    resumeBtn.style.display = "block";
 
-    function resumeSurveillance() {
-        showNotification('Surveillance resumed', 'success');
+    fetch("/pause", { method: "POST" })
+        .then(() => showNotification("Surveillance paused", "warning"))
+        .catch(() => showNotification("Failed to pause surveillance", "danger"));
+}
 
-        document.getElementById('pauseBtn').style.display = 'block';
-        document.getElementById('resumeBtn').style.display = 'none';
+function resumeSurveillance() {
+    const pauseBtn = document.getElementById("pauseBtn");
+    const resumeBtn = document.getElementById("resumeBtn");
 
-        // Optional: call an API like /resume to remove the .flag file
-        fetch('/resume', { method: 'POST' });
-    }
+    if (!pauseBtn || !resumeBtn) return;
+
+    pauseBtn.style.display = "block";
+    resumeBtn.style.display = "none";
+
+    fetch("/resume", { method: "POST" })
+        .then(() => showNotification("Surveillance resumed", "success"))
+        .catch(() => showNotification("Failed to resume surveillance", "danger"));
+}
 
     function confirmShutdown() {
         if (confirm('Are you sure you want to shutdown the security system?')) {
