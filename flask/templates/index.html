@@ -258,6 +258,19 @@
                     Arm Siren
                 </button>
             </div>
+                        <div class="col-md-3 col-sm-6">
+                <button class="control-btn btn-arm-light w-100" onclick="toggleArmLight()">
+                    <i class="bi bi-lightbulb me-2"></i>
+                    Pause Surveillance
+                </button>
+            </div>
+                        </div>
+                        <div class="col-md-3 col-sm-6">
+                <button class="control-btn btn-arm-light w-100" onclick="toggleArmLight()">
+                    <i class="bi bi-lightbulb me-2"></i>
+                    Resume Surveillance
+                </button>
+            </div>
             <div class="col-md-3 col-sm-6">
                 <button class="control-btn btn-shutdown w-100" onclick="confirmShutdown()">
                     <i class="bi bi-power me-2"></i>
@@ -341,6 +354,26 @@
             btn.style.background = 'linear-gradient(135deg, var(--accent-green), #48bb78)';
             showNotification('Security siren disarmed', 'warning');
         }
+    }
+        function pauseSurveillance() {
+        // Send request to Flask backend (optional: use fetch)
+        showNotification('Surveillance paused', 'warning');
+
+        document.getElementById('pauseBtn').style.display = 'none';
+        document.getElementById('resumeBtn').style.display = 'block';
+
+        // Optional: call an API like /pause to create the .flag file
+        fetch('/pause', { method: 'POST' });
+    }
+
+    function resumeSurveillance() {
+        showNotification('Surveillance resumed', 'success');
+
+        document.getElementById('pauseBtn').style.display = 'block';
+        document.getElementById('resumeBtn').style.display = 'none';
+
+        // Optional: call an API like /resume to remove the .flag file
+        fetch('/resume', { method: 'POST' });
     }
 
     function confirmShutdown() {

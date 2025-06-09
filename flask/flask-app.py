@@ -81,6 +81,19 @@ def arm_light():
     print("Light armed")
     return jsonify({"status": "Light armed", "message": "Motion detection light activated"})
 
+@app.route('/pause', methods=['POST'])
+def pause_surveillance():
+    open("/tmp/motion_pause.flag", "w").close()
+    return '', 204
+
+@app.route('/resume', methods=['POST'])
+def resume_surveillance():
+    try:
+        os.remove("/tmp/motion_pause.flag")
+    except FileNotFoundError:
+        pass
+    return '', 204
+
 @app.route("/arm_siren", methods=["POST"])
 def arm_siren():
     # Implement siren arming logic here

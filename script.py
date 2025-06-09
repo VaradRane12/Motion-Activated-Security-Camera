@@ -13,6 +13,7 @@ from picamera2.encoders import H264Encoder
 from picamera2.outputs import FileOutput
 from libcamera import Transform
 import glob
+PAUSE_FLAG_PATH = "/home/pi/motion_pause.flag"
 
 import logging
 import sys
@@ -162,6 +163,11 @@ last_motion_time = 0
 motion_threshold_area = 1000
 
 while True:
+    if os.path.exists(PAUSE_FLAG_PATH):
+        print("Motion detection paused.")
+        time.sleep(1)
+        continue
+
     yuv_buffer = picam2.capture_buffer("lores")
     yuv = np.frombuffer(yuv_buffer, dtype=np.uint8)
     yuv = yuv.reshape((240 * 3 // 2, 320))
