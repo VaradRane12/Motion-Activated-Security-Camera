@@ -86,7 +86,7 @@ motion_config = picam2.create_video_configuration(
 
 # Recording configuration
 record_config = picam2.create_video_configuration(
-    main={"size": (1920, 1080), "format": "RGB888"},
+    main={"size": (640, 480), "format": "RGB888"},
     transform=Transform(hflip=1, vflip=1),
     controls={"FrameRate": 15}
 )
