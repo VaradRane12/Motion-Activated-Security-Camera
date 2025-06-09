@@ -168,69 +168,69 @@ while True:
         print("Motion detection paused.")
         time.sleep(1)
         continue
-
-    yuv_buffer = picam2.capture_buffer("lores")
-    yuv = np.frombuffer(yuv_buffer, dtype=np.uint8)
-    yuv = yuv.reshape((240 * 3 // 2, 320))
-    frame = cv2.cvtColor(yuv, cv2.COLOR_YUV2BGR_I420)
-
-    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    gray = cv2.GaussianBlur(gray, (21, 21), 0)
-    current_time = time.time()
-
-    if last_frame is None:
-        last_frame = gray
-        continue
-
-    frame_delta = cv2.absdiff(last_frame, gray)
-    thresh = cv2.threshold(frame_delta, 25, 255, cv2.THRESH_BINARY)[1]
-    thresh = cv2.dilate(thresh, None, iterations=2)
-    contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-
-    motion_detected = any(cv2.contourArea(c) > motion_threshold_area for c in contours)
-
-    if motion_detected and (current_time - last_motion_time) > cooldown_after_recording:
-        led_thread = threading.Thread(target=led_Blink, args=(LED_PIN,))
-        led_thread.start()
-        print("Motion detected. Starting recording...")
-        timestamp = datetime.now().strftime("%y%b%d_%H-%M-%S")
-        h264_path = f"/home/pi/Desktop/{timestamp}.h264"
-        output = FileOutput(h264_path)
-
-        # Stop motion detection stream
-        picam2.stop()
-        time.sleep(0.025)
-
-        # Switch to recording config
-        picam2.configure(record_config)
-        picam2.start()
-        time.sleep(0.025)
-
-        picam2.start_recording(encoder, output)
-        start_time = time.time()
-
-        while time.time() - start_time < record_duration:
-            print(f"Recording... {int(time.time() - start_time)}s", end='\r')
-            time.sleep(1)
-
-        picam2.stop_recording()
-        print("\nRecording done.")
-
-        # Start the thread for conversion + upload
-        upload_thread = threading.Thread(target=convert_and_upload, args=(h264_path, timestamp))
-        upload_thread.start()
-        
-        # Reset to motion detection stream
-        picam2.stop()
-        time.sleep(0.025) 
-        picam2.configure(motion_config)
-        picam2.start()
-        time.sleep(0.025)
-
-        last_frame = None
-        last_motion_time = time.time()
-
     else:
-        last_frame = gray
+        yuv_buffer = picam2.capture_buffer("lores")
+        yuv = np.frombuffer(yuv_buffer, dtype=np.uint8)
+        yuv = yuv.reshape((240 * 3 // 2, 320))
+        frame = cv2.cvtColor(yuv, cv2.COLOR_YUV2BGR_I420)
 
+        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        gray = cv2.GaussianBlur(gray, (21, 21), 0)
+        current_time = time.time()
+
+        if last_frame is None:
+            last_frame = gray
+            continue
+
+        frame_delta = cv2.absdiff(last_frame, gray)
+        thresh = cv2.threshold(frame_delta, 25, 255, cv2.THRESH_BINARY)[1]
+        thresh = cv2.dilate(thresh, None, iterations=2)
+        contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+        motion_detected = any(cv2.contourArea(c) > motion_threshold_area for c in contours)
+
+        if motion_detected and (current_time - last_motion_time) > cooldown_after_recording:
+            led_thread = threading.Thread(target=led_Blink, args=(LED_PIN,))
+            led_thread.start()
+            print("Motion detected. Starting recording...")
+            timestamp = datetime.now().strftime("%y%b%d_%H-%M-%S")
+            h264_path = f"/home/pi/Desktop/{timestamp}.h264"
+            output = FileOutput(h264_path)
+
+            # Stop motion detection stream
+            picam2.stop()
+            time.sleep(0.025)
+
+            # Switch to recording config
+            picam2.configure(record_config)
+            picam2.start()
+            time.sleep(0.025)
+
+            picam2.start_recording(encoder, output)
+            start_time = time.time()
+
+            while time.time() - start_time < record_duration:
+                print(f"Recording... {int(time.time() - start_time)}s", end='\r')
+                time.sleep(1)
+
+            picam2.stop_recording()
+            print("\nRecording done.")
+
+            # Start the thread for conversion + upload
+            upload_thread = threading.Thread(target=convert_and_upload, args=(h264_path, timestamp))
+            upload_thread.start()
+            
+            # Reset to motion detection stream
+            picam2.stop()
+            time.sleep(0.025) 
+            picam2.configure(motion_config)
+            picam2.start()
+            time.sleep(0.025)
+
+            last_frame = None
+            last_motion_time = time.time()
+
+        else:
+            last_frame = gray
+    
     time.sleep(0.1)
