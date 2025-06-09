@@ -83,13 +83,13 @@ def arm_light():
 
 @app.route('/pause', methods=['POST'])
 def pause_surveillance():
-    open("/tmp/motion_pause.flag", "w").close()
+    open("/home/pi/motion_pause.flag", "w").close()
     return '', 204
 
 @app.route('/resume', methods=['POST'])
 def resume_surveillance():
     try:
-        os.remove("/tmp/motion_pause.flag")
+        os.remove("/home/pi/motion_pause.flag")
     except FileNotFoundError:
         pass
     return '', 204

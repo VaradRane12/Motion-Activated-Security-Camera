@@ -164,6 +164,7 @@ motion_threshold_area = 1000
 
 while True:
     if os.path.exists(PAUSE_FLAG_PATH):
+        print("paused")
         print("Motion detection paused.")
         time.sleep(1)
         continue
