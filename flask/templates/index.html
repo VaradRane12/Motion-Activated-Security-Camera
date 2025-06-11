@@ -225,10 +225,11 @@
                 <p class="mb-0 mt-2 opacity-75">Real-time surveillance monitoring</p>
             </div>
             <div class="col-md-4 text-end">
-                <div class="system-status">
-                    <i class="bi bi-circle-fill text-success me-2"></i>
-                    System Online
+                <div id="systemStatus" class="system-status text-success">
+                    <i id="statusIcon" class="bi bi-circle-fill me-2"></i>
+                    <span id="statusText">System Online</span>
                 </div>
+
             </div>
         </div>
     </div>
@@ -358,6 +359,9 @@
         function pauseSurveillance() {
     const pauseBtn = document.getElementById("pauseBtn");
     const resumeBtn = document.getElementById("resumeBtn");
+    const systemStatus = document.getElementById("systemStatus");
+    const statusIcon = document.getElementById("statusIcon");
+    const statusText = document.getElementById("statusText");
 
     if (!pauseBtn || !resumeBtn) return;
 
@@ -365,13 +369,27 @@
     resumeBtn.style.display = "block";
 
     fetch("/pause", { method: "POST" })
-        .then(() => showNotification("Surveillance paused", "warning"))
+        .then(() => {
+            showNotification("Surveillance paused", "warning");
+            // Update status to Offline
+            systemStatus.classList.remove("text-success");
+            systemStatus.classList.add("text-danger");
+            statusIcon.classList.remove("bi-circle-fill");
+            statusIcon.classList.add("bi-slash-circle-fill");
+            statusText.textContent = "System Offline";
+            systemStatus.style.border = "1px solid var(--accent-red)";
+systemStatus.style.background = "rgba(229, 62, 62, 0.2)";
+
+        })
         .catch(() => showNotification("Failed to pause surveillance", "danger"));
 }
 
 function resumeSurveillance() {
     const pauseBtn = document.getElementById("pauseBtn");
     const resumeBtn = document.getElementById("resumeBtn");
+    const systemStatus = document.getElementById("systemStatus");
+    const statusIcon = document.getElementById("statusIcon");
+    const statusText = document.getElementById("statusText");
 
     if (!pauseBtn || !resumeBtn) return;
 
@@ -379,9 +397,21 @@ function resumeSurveillance() {
     resumeBtn.style.display = "none";
 
     fetch("/resume", { method: "POST" })
-        .then(() => showNotification("Surveillance resumed", "success"))
+        .then(() => {
+            showNotification("Surveillance resumed", "success");
+            // Update status to Online
+            systemStatus.classList.remove("text-danger");
+            systemStatus.classList.add("text-success");
+            statusIcon.classList.remove("bi-slash-circle-fill");
+            statusIcon.classList.add("bi-circle-fill");
+            statusText.textContent = "System Online";
+            systemStatus.style.border = "1px solid var(--accent-green)";
+systemStatus.style.background = "rgba(56, 161, 105, 0.2)";
+
+        })
         .catch(() => showNotification("Failed to resume surveillance", "danger"));
 }
+
 
     function confirmShutdown() {
         if (confirm('Are you sure you want to shutdown the security system?')) {
