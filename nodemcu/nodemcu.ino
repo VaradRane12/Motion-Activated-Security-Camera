@@ -1,14 +1,14 @@
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h>
 
-const char* ssid = "Varad-2";
+const char* ssid = "VARAD";
 const char* password = "Adventure4@4242";
-const char* mqtt_server = "192.168.1.12"; // IP of Raspberry Pi
+const char* mqtt_server = "192.168.1.12"; 
 
 WiFiClient espClient;
 PubSubClient client(espClient);
 
-const int relayPin = 2;  // Or D2, depending on wiring
+const int relayPin = 3;  
 
 void setup_wifi() {
   delay(10);
