@@ -62,22 +62,23 @@ def get_video_files():
 @app.route("/")
 def index():
     videos = get_video_files()
-    return render_template("index.html", videos=videos)
+
+    pause_flag_path = "/home/pi/motion_pause.flag"
+    surveillance_state = "paused" if os.path.exists(pause_flag_path) else "resumed"
+
+    return render_template("index.html", videos=videos, surveillance_state=surveillance_state)
 
 @app.route("/live_feed")
 def live_feed():
-    # Implement your live feed logic here
     return jsonify({"status": "Live feed activated", "message": "Connecting to live stream..."})
 
 @app.route("/shutdown", methods=["POST"])
 def shutdown():
-    # Implement shutdown logic here
     print("Shutdown requested")
     return jsonify({"status": "Shutdown initiated", "message": "System shutting down safely..."})
 
 @app.route("/arm_light", methods=["POST"])
 def arm_light():
-    # Implement light arming logic here 
     print("Light armed")
     return jsonify({"status": "Light armed", "message": "Motion detection light activated"})
 
@@ -96,7 +97,6 @@ def resume_surveillance():
 
 @app.route("/arm_siren", methods=["POST"])
 def arm_siren():
-    # Implement siren arming logic here
     print("Siren armed")
     return jsonify({"status": "Siren armed", "message": "Motion detection siren activated"})
 
