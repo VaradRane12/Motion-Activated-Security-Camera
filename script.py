@@ -164,10 +164,26 @@ motion_threshold_area = 1000
 
 while True:
     if os.path.exists(PAUSE_FLAG_PATH):
-        print("paused")
-        print("Motion detection paused.")
-        time.sleep(1)
+        print("Motion detection paused. Releasing camera.")
+        try:
+            picam2.stop()
+        except Exception as e:
+            print(f"Error stopping camera: {e}")
+
+        while os.path.exists(PAUSE_FLAG_PATH):
+            time.sleep(0.5)
+
+        print("Resuming motion detection. Reinitializing camera.")
+        try:
+            picam2 = Picamera2()
+            picam2.configure(motion_config)
+            picam2.start()
+            time.sleep(2)
+            last_frame = None  
+        except Exception as e:
+            print(f"Error reinitializing camera: {e}")
         continue
+
     else:
         yuv_buffer = picam2.capture_buffer("lores")
         yuv = np.frombuffer(yuv_buffer, dtype=np.uint8)
