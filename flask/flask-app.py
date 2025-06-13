@@ -2,11 +2,30 @@ import os
 import boto3
 from flask import Flask, render_template, request, jsonify
 from dotenv import load_dotenv
-
+from flask import Response
+from picamera2 import Picamera2
+import cv2
+import time
 # Load .env variables
 load_dotenv()
 
 app = Flask(__name__)
+# Setup Picamera2 only once globally
+picam2 = Picamera2()
+picam2.configure(picam2.create_video_configuration(main={"size": (640, 480)}))
+picam2.start()
+
+def generate_frames():
+    while True:
+        # Check if motion is paused (so we don't stream when detection is running)
+        if os.path.exists("/home/pi/motion_pause.flag"):
+            frame = picam2.capture_array()
+            _, buffer = cv2.imencode('.jpg', frame)
+            frame = buffer.tobytes()
+            yield (b'--frame\r\n'
+                   b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+        else:
+            time.sleep(0.1)
 
 # Load config from .env
 AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
@@ -69,8 +88,9 @@ def index():
     return render_template("index.html", videos=videos, surveillance_state=surveillance_state)
 
 @app.route("/live_feed")
-def live_feed():
-    return jsonify({"status": "Live feed activated", "message": "Connecting to live stream..."})
+def video_feed():
+    return Response(generate_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
+
 
 @app.route("/shutdown", methods=["POST"])
 def shutdown():

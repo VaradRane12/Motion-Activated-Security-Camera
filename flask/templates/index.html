@@ -316,19 +316,27 @@
     let sirenArmed = false;
 
     function toggleLiveFeed() {
-        liveFeedActive = !liveFeedActive;
-        const btn = document.querySelector('.btn-live-feed');
-        
-        if (liveFeedActive) {
-            btn.innerHTML = '<i class="bi bi-stop-circle me-2"></i>Stop Feed';
-            btn.style.background = 'linear-gradient(135deg, #e53e3e, #f56565)';
-            showNotification('Live feed activated', 'success');
-        } else {
-            btn.innerHTML = '<i class="bi bi-broadcast me-2"></i>Live Feed';
-            btn.style.background = 'linear-gradient(135deg, var(--accent-blue), #4299e1)';
-            showNotification('Live feed deactivated', 'info');
-        }
+    liveFeedActive = !liveFeedActive;
+    const btn = document.querySelector('.btn-live-feed');
+    const liveFeedContainer = document.getElementById("liveFeedContainer");
+
+    if (liveFeedActive) {
+        fetch("/pause", { method: "POST" });
+
+        btn.innerHTML = '<i class="bi bi-stop-circle me-2"></i>Stop Feed';
+        btn.style.background = 'linear-gradient(135deg, #e53e3e, #f56565)';
+        showNotification('Live feed activated', 'success');
+        liveFeedContainer.style.display = "block";
+    } else {
+        fetch("/resume", { method: "POST" });
+
+        btn.innerHTML = '<i class="bi bi-broadcast me-2"></i>Live Feed';
+        btn.style.background = 'linear-gradient(135deg, var(--accent-blue), #4299e1)';
+        showNotification('Live feed deactivated', 'info');
+        liveFeedContainer.style.display = "none";
     }
+}
+
 
     function toggleArmLight() {
         lightArmed = !lightArmed;
