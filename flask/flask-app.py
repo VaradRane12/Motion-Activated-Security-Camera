@@ -10,12 +10,13 @@ import time
 load_dotenv()
 
 app = Flask(__name__)
-# Setup Picamera2 only once globally
-picam2 = Picamera2()
-picam2.configure(picam2.create_video_configuration(main={"size": (640, 480)}))
-picam2.start()
+
 
 def generate_frames():
+    # Setup Picamera2 only once globally
+    picam2 = Picamera2()
+    picam2.configure(picam2.create_video_configuration(main={"size": (640, 480)}))
+    picam2.start()
     while True:
         # Check if motion is paused (so we don't stream when detection is running)
         if os.path.exists("/home/pi/motion_pause.flag"):
