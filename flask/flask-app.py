@@ -129,6 +129,7 @@ def stop_live_feed():
 
     return "", 204
 
+
 @app.route("/")
 def index():
     videos = get_video_files()
