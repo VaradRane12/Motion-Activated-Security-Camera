@@ -39,24 +39,24 @@ class PrintLogger(object):
 sys.stdout = PrintLogger()
 sys.stderr = PrintLogger()
 
-LED_PIN = 17  # BCM numbering (Pin 11)
-GPIO.setmode(GPIO.BCM)
+LED_PIN = 17  
+GPIO.setmode(GPIO.BCM) #BCM is broadcom SOC channel
 GPIO.setup(LED_PIN, GPIO.OUT)
 GPIO.output(LED_PIN, GPIO.HIGH)
 
 
 
-home_dir = os.path.expanduser("~")
-desktop_path = os.path.join(home_dir, "Desktop")
+home_dir = os.path.expanduser("~") #Gets hte Home Directory avoid reletive paths
+desktop_path = os.path.join(home_dir, "Desktop") #COmbines the home dir with desktop for hte video storage
 
-for file in glob.glob(os.path.join(desktop_path, "*.h264")):
+for file in glob.glob(os.path.join(desktop_path, "*.h264")): #Removing all the h264 files at the start as if deleted while the program is running then it cant record
     try:
         os.remove(file)
         print(f"Deleted: {file}")
     except Exception as e:
         print(f"Error deleting {file}: {e}")
 
-def led_Blink(pin):
+def led_Blink(pin):  #function for blinking oof hte ilght and control of the light
     try:
         start_time = time.time()
         timeout = 10
@@ -73,6 +73,8 @@ def led_Blink(pin):
 
     except:
         return
+    
+    
 # Initialize camera and AWS S3
 picam2 = Picamera2()
 s3_client = boto3.client("s3")
