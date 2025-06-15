@@ -8,214 +8,15 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    <style>
-        :root {
-            --primary-dark: #1a1d29;
-            --secondary-dark: #2d3748;
-            --accent-blue: #3182ce;
-            --accent-green: #38a169;
-            --accent-red: #e53e3e;
-            --accent-orange: #dd6b20;
-        }
-
-        body {
-            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--secondary-dark) 100%);
-            color: white;
-            min-height: 100vh;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
-        .main-header {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 20px;
-            margin-bottom: 30px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-        }
-
-        .control-panel {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border-radius: 15px;
-            padding: 20px;
-            margin-bottom: 30px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-        }
-
-        .control-btn {
-            padding: 12px 20px;
-            border-radius: 12px;
-            border: none;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-            margin: 5px;
-        }
-
-        .control-btn::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-            transition: left 0.5s;
-        }
-
-        .control-btn:hover::before {
-            left: 100%;
-        }
-
-        .btn-live-feed {
-            background: linear-gradient(135deg, var(--accent-blue), #4299e1);
-            color: white;
-            box-shadow: 0 4px 15px rgba(49, 130, 206, 0.4);
-        }
-
-        .btn-live-feed:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(49, 130, 206, 0.6);
-        }
-
-        .btn-shutdown {
-            background: linear-gradient(135deg, var(--accent-red), #f56565);
-            color: white;
-            box-shadow: 0 4px 15px rgba(229, 62, 62, 0.4);
-        }
-
-        .btn-shutdown:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(229, 62, 62, 0.6);
-        }
-
-        .btn-arm-light {
-            background: linear-gradient(135deg, var(--accent-orange), #ed8936);
-            color: white;
-            box-shadow: 0 4px 15px rgba(221, 107, 32, 0.4);
-        }
-
-        .btn-arm-light:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(221, 107, 32, 0.6);
-        }
-
-        .btn-arm-siren {
-            background: linear-gradient(135deg, var(--accent-green), #48bb78);
-            color: white;
-            box-shadow: 0 4px 15px rgba(56, 161, 105, 0.4);
-        }
-
-        .btn-arm-siren:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(56, 161, 105, 0.6);
-        }
-
-        .video-card {
-            margin-bottom: 30px;
-            transition: transform 0.3s ease;
-        }
-
-        .video-card:hover {
-            transform: translateY(-5px);
-        }
-
-        .camera-card {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 20px;
-            overflow: hidden;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-            transition: all 0.3s ease;
-        }
-
-        .camera-card:hover {
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
-            border-color: rgba(255, 255, 255, 0.3);
-        }
-
-        .video-title {
-            font-weight: 700;
-            font-size: 1.1rem;
-            margin-bottom: 15px;
-            color: #fff;
-            text-align: center;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-        }
-
-        video {
-            width: 100%;
-            height: 200px;
-            object-fit: cover;
-            border-radius: 15px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-        }
-
-        .status-indicator {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            background: var(--accent-green);
-            box-shadow: 0 0 10px var(--accent-green);
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0% { box-shadow: 0 0 0 0 rgba(56, 161, 105, 0.7); }
-            70% { box-shadow: 0 0 0 10px rgba(56, 161, 105, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(56, 161, 105, 0); }
-        }
-
-        .camera-info {
-            padding: 20px;
-            position: relative;
-        }
-
-        .system-status {
-            background: rgba(56, 161, 105, 0.2);
-            border: 1px solid var(--accent-green);
-            border-radius: 10px;
-            padding: 10px 15px;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-
-        .container {
-            margin-top: 20px;
-            padding: 0 15px;
-        }
-
-        .footer-info {
-            text-align: center;
-            margin-top: 40px;
-            opacity: 0.7;
-            font-size: 0.9rem;
-        }
-
-        @media (max-width: 768px) {
-            .control-btn {
-                width: 100%;
-                margin: 5px 0;
-            }
-            
-            video {
-                height: 150px;
-            }
-        }
-    </style>
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
-<div class="container">
+    <p id="debugState">Server thinks the system is: {{ surveillance_state }}</p>
+
+<div class="container py-4">
     <!-- Header -->
-    <div class="main-header">
+    <div class="main-header mb-4">
         <div class="row align-items-center">
             <div class="col-md-8">
                 <h1 class="mb-0">
@@ -225,72 +26,74 @@
                 <p class="mb-0 mt-2 opacity-75">Real-time surveillance monitoring</p>
             </div>
             <div class="col-md-4 text-end">
-<div id="systemStatus" class="system-status text-success">
-    <i id="statusIcon" class="bi bi-circle-fill me-2"></i>
-    <span id="statusText">System Online</span>
-</div>
-
-
+                <div id="systemStatus" class="system-status text-success">
+                    <i id="statusIcon" class="bi bi-circle-fill me-2"></i>
+                    <span id="statusText">System Online</span>
+                </div>
             </div>
         </div>
     </div>
 
     <!-- Control Panel -->
-    <div class="control-panel">
+    <div class="control-panel mb-4">
         <h4 class="mb-3">
             <i class="bi bi-gear-fill me-2"></i>
             Control Panel
         </h4>
-        <div class="row">
-            <div class="col-md-3 col-sm-6">
-                <button class="control-btn btn-live-feed w-100" onclick="toggleLiveFeed()">
-                    <i class="bi bi-broadcast me-2"></i>
-                    Live Feed
-                </button>
-            </div>
-            <div class="col-md-3 col-sm-6">
-                <button class="control-btn btn-arm-light w-100" onclick="toggleArmLight()">
-                    <i class="bi bi-lightbulb me-2"></i>
-                    Arm Light
-                </button>
-            </div>
-            <div class="col-md-3 col-sm-6">
-                <button class="control-btn btn-arm-siren w-100" onclick="toggleArmSiren()">
-                    <i class="bi bi-volume-up me-2"></i>
-                    Arm Siren
-                </button>
-            </div>
-<div class="col-md-3 col-sm-6">
-    <button id="pauseBtn" class="control-btn btn-arm-light w-100" onclick="pauseSurveillance()">
-        <i class="bi bi-pause-circle me-2"></i>
-        Pause Surveillance
-    </button>
-</div>
-<div class="col-md-3 col-sm-6">
-    <button id="resumeBtn" class="control-btn btn-arm-light w-100" onclick="resumeSurveillance()" style="display: none;">
-        <i class="bi bi-play-circle me-2"></i>
-        Resume Surveillance
-    </button>
-</div>
+        <div class="row g-3">
+
 
             <div class="col-md-3 col-sm-6">
-                <button class="control-btn btn-shutdown w-100" onclick="confirmShutdown()">
-                    <i class="bi bi-power me-2"></i>
-                    Shutdown
+                <button class="btn btn-warning w-100" onclick="toggleArmLight()">
+                    <i class="bi bi-lightbulb me-2"></i>Arm Light
+                </button>
+            </div>
+
+            <div class="col-md-3 col-sm-6">
+                <button class="btn btn-danger w-100" onclick="toggleArmSiren()">
+                    <i class="bi bi-volume-up me-2"></i>Arm Siren
+                </button>
+            </div>
+
+            <div class="col-md-3 col-sm-6">
+                <button class="btn btn-success w-100" onclick="startLiveFeed()" data-bs-toggle="modal" data-bs-target="#liveFeedModal">
+                    <i class="bi bi-camera-video me-2"></i>Start Live Feed
+                </button>
+            </div>
+<div class="col-md-3 col-sm-6">
+                <button id="pauseBtn" class="btn btn-secondary w-100" onclick="pauseSurveillance()">
+                    <i class="bi bi-pause-circle me-2"></i>Pause Surveillance
+                </button>
+            </div>
+
+            <div class="col-md-3 col-sm-6">
+                <button id="resumeBtn" class="btn btn-success w-100" onclick="resumeSurveillance()" style="display: none;">
+                    <i class="bi bi-play-circle me-2"></i>Resume Surveillance
+                </button>
+            </div> 
+
+
+
+            <div class="col-md-3 col-sm-6">
+                <button class="btn btn-outline-danger w-100" onclick="confirmShutdown()">
+                    <i class="bi bi-power me-2"></i>Shutdown
                 </button>
             </div>
         </div>
     </div>
 
+
     <!-- Camera Grid -->
-    <div class="row">
+    <div class="row g-4">
         {% for video in videos %}
-        <div class="col-xl-3 col-lg-4 col-md-6 video-card">
-            <div class="camera-card">
-                <div class="camera-info">
-                    <div class="status-indicator"></div>
-                    <div class="video-title">{{ video.name }}</div>
-                    <video controls>
+        <div class="col-xl-3 col-lg-4 col-md-6">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h6 class="card-title d-flex align-items-center">
+                        <span class="status-indicator me-2"></span>
+                        {{ video.name }}
+                    </h6>
+                    <video class="w-100" controls>
                         <source src="{{ video.url }}" type="video/mp4">
                         Your browser does not support the video tag.
                     </video>
@@ -300,223 +103,34 @@
         {% endfor %}
     </div>
 
-    <div class="footer-info">
-        <p><i class="bi bi-info-circle me-2"></i>Secure surveillance system - All feeds encrypted</p>
+    <!-- Footer -->
+    <div class="mt-5 text-center text-muted small">
+        <i class="bi bi-info-circle me-2"></i>Secure surveillance system - All feeds encrypted
     </div>
 </div>
 
-<!-- Bootstrap JS Bundle -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Live Feed Modal -->
+<div class="modal fade" id="liveFeedModal" tabindex="-1" aria-labelledby="liveFeedModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="liveFeedModalLabel">Live Camera Feed</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" onclick="stopLiveFeed()"></button>
+      </div>
+      <div class="modal-body text-center">
+        <img id="liveFeedImg" src="" width="100%" />
+      </div>
+    </div>
+  </div>
+</div>
 
-<script>
-    const surveillanceState = "{{ surveillance_state }}";  // From Flask
-
-    let liveFeedActive = false;
-    let lightArmed = false;
-    let sirenArmed = false;
-
-    function toggleLiveFeed() {
-    liveFeedActive = !liveFeedActive;
-    const btn = document.querySelector('.btn-live-feed');
-    const liveFeedContainer = document.getElementById("liveFeedContainer");
-
-    if (liveFeedActive) {
-        fetch("/pause", { method: "POST" });
-        fetch("/live_feed")
-
-        btn.innerHTML = '<i class="bi bi-stop-circle me-2"></i>Stop Feed';
-        btn.style.background = 'linear-gradient(135deg, #e53e3e, #f56565)';
-        showNotification('Live feed activated', 'success');
-        liveFeedContainer.style.display = "block";
-    } else {
-        fetch("/resume", { method: "POST" });
-
-        btn.innerHTML = '<i class="bi bi-broadcast me-2"></i>Live Feed';
-        btn.style.background = 'linear-gradient(135deg, var(--accent-blue), #4299e1)';
-        showNotification('Live feed deactivated', 'info');
-        liveFeedContainer.style.display = "none";
-    }
-}
-
-
-    function toggleArmLight() {
-        lightArmed = !lightArmed;
-        const btn = document.querySelector('.btn-arm-light');
-        
-        if (lightArmed) {
-            btn.innerHTML = '<i class="bi bi-lightbulb-fill me-2"></i>Light Armed';
-            btn.style.background = 'linear-gradient(135deg, #38a169, #48bb78)';
-            showNotification('Security lights armed', 'success');
-        } else {
-            btn.innerHTML = '<i class="bi bi-lightbulb me-2"></i>Arm Light';
-            btn.style.background = 'linear-gradient(135deg, var(--accent-orange), #ed8936)';
-            showNotification('Security lights disarmed', 'warning');
-        }
-    }
-
-    function toggleArmSiren() {
-        sirenArmed = !sirenArmed;
-        const btn = document.querySelector('.btn-arm-siren');
-        
-        if (sirenArmed) {
-            btn.innerHTML = '<i class="bi bi-volume-up-fill me-2"></i>Siren Armed';
-            btn.style.background = 'linear-gradient(135deg, #e53e3e, #f56565)';
-            showNotification('Security siren armed', 'success');
-        } else {
-            btn.innerHTML = '<i class="bi bi-volume-up me-2"></i>Arm Siren';
-            btn.style.background = 'linear-gradient(135deg, var(--accent-green), #48bb78)';
-            showNotification('Security siren disarmed', 'warning');
-        }
-    }
-        function pauseSurveillance() {
-    const pauseBtn = document.getElementById("pauseBtn");
-    const resumeBtn = document.getElementById("resumeBtn");
-    const systemStatus = document.getElementById("systemStatus");
-    const statusIcon = document.getElementById("statusIcon");
-    const statusText = document.getElementById("statusText");
-
-    if (!pauseBtn || !resumeBtn) return;
-
-    pauseBtn.style.display = "none";
-    resumeBtn.style.display = "block";
-
-    fetch("/pause", { method: "POST" })
-        .then(() => {
-            showNotification("Surveillance paused", "warning");
-            // Update status to Offline
-            systemStatus.classList.remove("text-success");
-            systemStatus.classList.add("text-danger");
-            statusIcon.classList.remove("bi-circle-fill");
-            statusIcon.classList.add("bi-slash-circle-fill");
-            statusText.textContent = "System Offline";
-            systemStatus.style.border = "1px solid var(--accent-red)";
-systemStatus.style.background = "rgba(229, 62, 62, 0.2)";
-
-        })
-        .catch(() => showNotification("Failed to pause surveillance", "danger"));
-}
-
-function resumeSurveillance() {
-    const pauseBtn = document.getElementById("pauseBtn");
-    const resumeBtn = document.getElementById("resumeBtn");
-    const systemStatus = document.getElementById("systemStatus");
-    const statusIcon = document.getElementById("statusIcon");
-    const statusText = document.getElementById("statusText");
-
-    if (!pauseBtn || !resumeBtn) return;
-
-    pauseBtn.style.display = "block";
-    resumeBtn.style.display = "none";
-
-    fetch("/resume", { method: "POST" })
-        .then(() => {
-            showNotification("Surveillance resumed", "success");
-            // Update status to Online
-            systemStatus.classList.remove("text-danger");
-            systemStatus.classList.add("text-success");
-            statusIcon.classList.remove("bi-slash-circle-fill");
-            statusIcon.classList.add("bi-circle-fill");
-            statusText.textContent = "System Online";
-            systemStatus.style.border = "1px solid var(--accent-green)";
-systemStatus.style.background = "rgba(56, 161, 105, 0.2)";
-
-        })
-        .catch(() => showNotification("Failed to resume surveillance", "danger"));
-}
-
-
-    function confirmShutdown() {
-        if (confirm('Are you sure you want to shutdown the security system?')) {
-            showNotification('System shutdown initiated...', 'danger');
-            // Add your shutdown logic here
-            setTimeout(() => {
-                showNotification('System shutdown complete', 'danger');
-            }, 3000);
-        }
-    }
-
-    function showNotification(message, type) {
-        // Create notification element
-        const notification = document.createElement('div');
-        notification.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
-        notification.style.cssText = `
-            top: 20px;
-            right: 20px;
-            z-index: 9999;
-            min-width: 300px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
-            backdrop-filter: blur(10px);
-        `;
-        
-        notification.innerHTML = `
-            ${message}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        `;
-        
-        document.body.appendChild(notification);
-        
-        // Auto-remove after 3 seconds
-        setTimeout(() => {
-            if (notification.parentNode) {
-                notification.parentNode.removeChild(notification);
-            }
-        }, 3000);
-    }
-
-    // Initialize tooltips
-document.addEventListener("DOMContentLoaded", function () {
-    // Setup tooltips
-    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-    tooltipTriggerList.map(function (tooltipTriggerEl) {
-        return new bootstrap.Tooltip(tooltipTriggerEl);
-    });
-
-    // Set initial surveillance status
-    if (surveillanceState === "paused") {
-        pauseSurveillanceUIOnly();
-    } else {
-        resumeSurveillanceUIOnly();
-    }
-});
-
-    function pauseSurveillanceUIOnly() {
-    const pauseBtn = document.getElementById("pauseBtn");
-    const resumeBtn = document.getElementById("resumeBtn");
-    const systemStatus = document.getElementById("systemStatus");
-    const statusIcon = document.getElementById("statusIcon");
-    const statusText = document.getElementById("statusText");
-
-    pauseBtn.style.display = "none";
-    resumeBtn.style.display = "block";
-
-    systemStatus.classList.remove("text-success");
-    systemStatus.classList.add("text-danger");
-    statusIcon.classList.remove("bi-circle-fill");
-    statusIcon.classList.add("bi-slash-circle-fill");
-    statusText.textContent = "System Offline";
-    systemStatus.style.border = "1px solid var(--accent-red)";
-    systemStatus.style.background = "rgba(229, 62, 62, 0.2)";
-}
-
-function resumeSurveillanceUIOnly() {
-    const pauseBtn = document.getElementById("pauseBtn");
-    const resumeBtn = document.getElementById("resumeBtn");
-    const systemStatus = document.getElementById("systemStatus");
-    const statusIcon = document.getElementById("statusIcon");
-    const statusText = document.getElementById("statusText");
-
-    pauseBtn.style.display = "block";
-    resumeBtn.style.display = "none";
-
-    systemStatus.classList.remove("text-danger");
-    systemStatus.classList.add("text-success");
-    statusIcon.classList.remove("bi-slash-circle-fill");
-    statusIcon.classList.add("bi-circle-fill");
-    statusText.textContent = "System Online";
-    systemStatus.style.border = "1px solid var(--accent-green)";
-    systemStatus.style.background = "rgba(56, 161, 105, 0.2)";
-}
-
+<!-- Scripts -->
+ <script>
+    const surveillance_state = "{{ surveillance_state }}";
 </script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="{{ url_for('static', filename='js/script.js') }}"></script>
+
 </body>
 </html>

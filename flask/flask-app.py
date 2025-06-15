@@ -12,22 +12,6 @@ load_dotenv()
 app = Flask(__name__)
 
 
-def generate_frames():
-    # Setup Picamera2 only once globally
-    picam2 = Picamera2()
-    picam2.configure(picam2.create_video_configuration(main={"size": (640, 480)}))
-    picam2.start()
-    while True:
-        # Check if motion is paused (so we don't stream when detection is running)
-        if os.path.exists("/home/pi/motion_pause.flag"):
-            frame = picam2.capture_array()
-            _, buffer = cv2.imencode('.jpg', frame)
-            frame = buffer.tobytes()
-            yield (b'--frame\r\n'
-                   b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
-        else:
-            time.sleep(0.1)
-
 # Load config from .env
 AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
 AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
@@ -78,20 +62,81 @@ def get_video_files():
             })
     
     return videos
+import subprocess
+import signal
+import psutil
+
+MOTION_PID_FILE = "/home/pi/motion_pid"
+LIVE_PID_FILE = "/home/pi/live_pid"
+
+def kill_pid_from_file(file):
+    if os.path.exists(file):
+        with open(file, "r") as f:
+            pid = int(f.read().strip())
+            try:
+                os.kill(pid, signal.SIGTERM)
+                return True
+            except ProcessLookupError:
+                return False
+picam2 = None
+@app.route("/start_live_feed", methods=["POST"])
+def start_live_feed():
+    kill_pid_from_file(MOTION_PID_FILE)
+    return jsonify({'message': 'Surveillance started'})
+
+    # p = subprocess.Popen(["python3", "/home/pi/Motion-Activated-Security-Camera/live_feed.py"])
+    # with open(LIVE_PID_FILE, "w") as f:
+    #     f.write(str(p.pid))
+
+    # return "", 204
+
+@app.route('/video_feed')
+def video_feed():
+    global picam2
+    if picam2 is None:
+
+        picam2 = Picamera2()
+        picam2.configure(picam2.create_video_configuration(main={"size": (640, 480)}))
+        picam2.start()
+
+    def generate_frames():
+        while True:
+            frame = picam2.capture_array()
+            frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
+            ret, buffer = cv2.imencode('.jpg', frame)
+            if not ret:
+                continue
+            frame = buffer.tobytes()
+
+            yield (b'--frame\r\n'
+                   b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+
+    return Response(generate_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
+
+@app.route("/stop_live_feed", methods=["POST"])
+def stop_live_feed():
+    global picam2
+    if picam2 is not None:
+        try:
+            picam2.stop()
+            picam2.close()
+            picam2 = None
+        except Exception as e:
+            print(f"error: {e}")
+    p = subprocess.Popen(["python3", "/home/pi/Motion-Activated-Security-Camera/script.py"])
+    with open(MOTION_PID_FILE, "w") as f:
+        f.write(str(p.pid))
+
+    return "", 204
 
 @app.route("/")
 def index():
     videos = get_video_files()
 
     pause_flag_path = "/home/pi/motion_pause.flag"
-    surveillance_state = "paused" if os.path.exists(pause_flag_path) else "resumed"
+    surveillance_state = "paused" if os.path.exists(pause_flag_path) else "resume"
 
     return render_template("index.html", videos=videos, surveillance_state=surveillance_state)
-
-@app.route("/live_feed")
-def video_feed():
-    return Response(generate_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
-
 
 @app.route("/shutdown", methods=["POST"])
 def shutdown():
