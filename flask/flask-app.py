@@ -123,7 +123,7 @@ def stop_live_feed():
             picam2 = None
         except Exception as e:
             print(f"error: {e}")
-    p = subprocess.Popen(["python3", "/home/pi/Motion-Activated-Security-Camera/script.py"])
+    p = subprocess.Popen(["python3", "/home/pi/testing_branches/Motion-Activated-Security-Camera/script.py"])
     with open(MOTION_PID_FILE, "w") as f:
         f.write(str(p.pid))
 
