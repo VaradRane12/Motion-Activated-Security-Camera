@@ -17,6 +17,9 @@ PAUSE_FLAG_PATH = "/home/pi/motion_pause.flag"
 
 import logging
 import sys
+PAUSE_FLAG_PATH = "/home/pi/motion_pause.flag"
+with open("/home/pi/motion_pid", "w") as f:
+    f.write(str(os.getpid()))
 
 # Logging setup
 logger = logging.getLogger("MotionLogger")
@@ -39,24 +42,24 @@ class PrintLogger(object):
 sys.stdout = PrintLogger()
 sys.stderr = PrintLogger()
 
-LED_PIN = 17  
-GPIO.setmode(GPIO.BCM) #BCM is broadcom SOC channel
+LED_PIN = 17  # BCM numbering (Pin 11)
+GPIO.setmode(GPIO.BCM)
 GPIO.setup(LED_PIN, GPIO.OUT)
 GPIO.output(LED_PIN, GPIO.HIGH)
 
 
 
-home_dir = os.path.expanduser("~") #Gets hte Home Directory avoid reletive paths
-desktop_path = os.path.join(home_dir, "Desktop") #COmbines the home dir with desktop for hte video storage
+home_dir = os.path.expanduser("~")
+desktop_path = os.path.join(home_dir, "Desktop")
 
-for file in glob.glob(os.path.join(desktop_path, "*.h264")): #Removing all the h264 files at the start as if deleted while the program is running then it cant record
+for file in glob.glob(os.path.join(desktop_path, "*.h264")):
     try:
         os.remove(file)
         print(f"Deleted: {file}")
     except Exception as e:
         print(f"Error deleting {file}: {e}")
 
-def led_Blink(pin):  #function for blinking oof hte ilght and control of the light
+def led_Blink(pin):
     try:
         start_time = time.time()
         timeout = 10
@@ -73,8 +76,6 @@ def led_Blink(pin):  #function for blinking oof hte ilght and control of the lig
 
     except:
         return
-    
-    
 # Initialize camera and AWS S3
 picam2 = Picamera2()
 s3_client = boto3.client("s3")
@@ -166,26 +167,10 @@ motion_threshold_area = 1000
 
 while True:
     if os.path.exists(PAUSE_FLAG_PATH):
-        print("Motion detection paused. Releasing camera.")
-        try:
-            picam2.stop()
-        except Exception as e:
-            print(f"Error stopping camera: {e}")
-
-        while os.path.exists(PAUSE_FLAG_PATH):
-            time.sleep(0.5)
-
-        print("Resuming motion detection. Reinitializing camera.")
-        try:
-            picam2 = Picamera2()
-            picam2.configure(motion_config)
-            picam2.start()
-            time.sleep(2)
-            last_frame = None  
-        except Exception as e:
-            print(f"Error reinitializing camera: {e}")
+        print("paused")
+        print("Motion detection paused.")
+        time.sleep(1)
         continue
-
     else:
         yuv_buffer = picam2.capture_buffer("lores")
         yuv = np.frombuffer(yuv_buffer, dtype=np.uint8)
