@@ -6,16 +6,16 @@ from flask_sqlalchemy import SQLAlchemy
 from flask import Response
 from picamera2 import Picamera2
 import cv2
+from models import db
 import time
 # Load .env variables
 load_dotenv()
 
 app = Flask(__name__)
-
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///lights.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///instance/lights.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-db = SQLAlchemy(app)
+db.init_app(app)
 # Load config from .env
 AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
 AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
