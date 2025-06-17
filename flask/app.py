@@ -146,8 +146,8 @@ def index():
 
     pause_flag_path = "/home/pi/motion_pause.flag"
     surveillance_state = "paused" if os.path.exists(pause_flag_path) else "resume"
-
-    return render_template("index.html", videos=videos, surveillance_state=surveillance_state)
+    device = Device.query.filter_by(name="parking light").first()  # or get(id)
+    return render_template("index.html", videos=videos, surveillance_state=surveillance_state,device = device)
 
 @app.route("/shutdown", methods=["POST"])
 def shutdown():
