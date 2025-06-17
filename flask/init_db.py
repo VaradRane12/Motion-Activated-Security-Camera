@@ -1,5 +1,5 @@
 from app import app, db
-import models
+from  models import Device
 
 with app.app_context():
     db.create_all()
