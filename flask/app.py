@@ -2,16 +2,25 @@ import os
 import boto3
 from flask import Flask, render_template, request, jsonify
 from dotenv import load_dotenv
+from flask_sqlalchemy import SQLAlchemy
 from flask import Response
 from picamera2 import Picamera2
 import cv2
+from models import db
 import time
+import subprocess
+import signal
+import psutil
+from models import Device
 # Load .env variables
 load_dotenv()
 
 app = Flask(__name__)
+basedir = os.path.abspath(os.path.dirname(__file__))
+app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{os.path.join(basedir, "instance/lights.db")}'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-
+db.init_app(app)
 # Load config from .env
 AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
 AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
@@ -28,7 +37,10 @@ s3_client = boto3.client(
 )
 
 def get_video_files():
-    response = s3_client.list_objects_v2(Bucket=S3_BUCKET, Prefix=S3_PREFIX)
+    try:
+        response = s3_client.list_objects_v2(Bucket=S3_BUCKET, Prefix=S3_PREFIX)
+    except:
+        print("cant get to s3")
     videos = []
     print(response["Contents"][-1])
     
@@ -62,9 +74,7 @@ def get_video_files():
             })
     
     return videos
-import subprocess
-import signal
-import psutil
+
 
 MOTION_PID_FILE = "/home/pi/motion_pid"
 LIVE_PID_FILE = "/home/pi/live_pid"
@@ -136,8 +146,8 @@ def index():
 
     pause_flag_path = "/home/pi/motion_pause.flag"
     surveillance_state = "paused" if os.path.exists(pause_flag_path) else "resume"
-
-    return render_template("index.html", videos=videos, surveillance_state=surveillance_state)
+    device = Device.query.filter_by(name="parking light").first()  # or get(id)
+    return render_template("index.html", videos=videos, surveillance_state=surveillance_state,device = device)
 
 @app.route("/shutdown", methods=["POST"])
 def shutdown():
@@ -153,6 +163,32 @@ def arm_light():
 def pause_surveillance():
     open("/home/pi/motion_pause.flag", "w").close()
     return '', 204
+@app.route('/light/on', methods=['POST'])
+def light_on():
+    device = device = db.session.get(Device, 1)
+    try:
+        os.system('mosquitto_pub -h localhost -t home/light1 -m "ON"')
+        device.status = 'ON'
+        db.session.commit()
+        return jsonify({'status': 'on'})
+    except:
+        return jsonify({"status":"failed"})
+        
+
+
+
+@app.route('/light/off', methods=['POST'])
+def light_off():
+    device = device = db.session.get(Device, 1)
+
+    try:
+        os.system('mosquitto_pub -h localhost -t home/light1 -m "OFF"')
+        device.status = 'ON'
+        db.session.commit()
+        return jsonify({'status': 'off'})
+    except:
+        return jsonify({"status":"failed"})
+        
 
 @app.route('/resume', methods=['POST'])
 def resume_surveillance():
