@@ -165,17 +165,30 @@ def pause_surveillance():
     return '', 204
 @app.route('/light/on', methods=['POST'])
 def light_on():
-    device = Device.query.get(1)  # or however you're identifying it
-    device.status = 'ON'
-    db.session.commit()
-    return jsonify({'status': 'on'})
+    device = device = db.session.get(Device, 1)
+    try:
+        os.system('mosquitto_pub -h localhost -t home/light1 -m "ON"')
+        device.status = 'ON'
+        db.session.commit()
+        return jsonify({'status': 'on'})
+    except:
+        return jsonify({"status":"failed"})
+        
+
+
 
 @app.route('/light/off', methods=['POST'])
 def light_off():
-    device = Device.query.get(1)
-    device.status = 'OFF'
-    db.session.commit()
-    return jsonify({'status': 'off'})
+    device = device = db.session.get(Device, 1)
+
+    try:
+        os.system('mosquitto_pub -h localhost -t home/light1 -m "OFF"')
+        device.status = 'ON'
+        db.session.commit()
+        return jsonify({'status': 'off'})
+    except:
+        return jsonify({"status":"failed"})
+        
 
 @app.route('/resume', methods=['POST'])
 def resume_surveillance():
