@@ -2,6 +2,7 @@ import os
 import boto3
 from flask import Flask, render_template, request, jsonify
 from dotenv import load_dotenv
+from flask_sqlalchemy import SQLAlchemy
 from flask import Response
 from picamera2 import Picamera2
 import cv2
@@ -11,7 +12,10 @@ load_dotenv()
 
 app = Flask(__name__)
 
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///lights.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
+db = SQLAlchemy(app)
 # Load config from .env
 AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
 AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
