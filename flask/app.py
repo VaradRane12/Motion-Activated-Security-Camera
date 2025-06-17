@@ -8,6 +8,10 @@ from picamera2 import Picamera2
 import cv2
 from models import db
 import time
+import subprocess
+import signal
+import psutil
+from models import Device
 # Load .env variables
 load_dotenv()
 
@@ -67,9 +71,7 @@ def get_video_files():
             })
     
     return videos
-import subprocess
-import signal
-import psutil
+
 
 MOTION_PID_FILE = "/home/pi/motion_pid"
 LIVE_PID_FILE = "/home/pi/live_pid"
@@ -158,6 +160,19 @@ def arm_light():
 def pause_surveillance():
     open("/home/pi/motion_pause.flag", "w").close()
     return '', 204
+@app.route('/light/on', methods=['POST'])
+def light_on():
+    device = Device.query.get(1)  # or however you're identifying it
+    device.status = 'ON'
+    db.session.commit()
+    return jsonify({'status': 'on'})
+
+@app.route('/light/off', methods=['POST'])
+def light_off():
+    device = Device.query.get(1)
+    device.status = 'OFF'
+    db.session.commit()
+    return jsonify({'status': 'off'})
 
 @app.route('/resume', methods=['POST'])
 def resume_surveillance():

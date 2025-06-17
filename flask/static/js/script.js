@@ -9,6 +9,14 @@ document.addEventListener("DOMContentLoaded", function () {
     } else {
         resumeSurveillanceUIOnly();
     }
+
+    if (lightStatus === "ON") {
+    document.getElementById("turnonlight").style.display = "none";
+    document.getElementById("turnofflight").style.display = "block";
+    } else {
+        document.getElementById("turnonlight").style.display = "block";
+        document.getElementById("turnofflight").style.display = "none";
+    }
 });
 
 
@@ -42,6 +50,26 @@ function stopLiveFeed() {
             console.error("Error stopping live feed:", err);
         });
 }
+
+
+
+    function turnOnLight() {
+        fetch('/light/on', { method: 'POST' })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById("turnonlight").style.display = "none";
+                document.getElementById("turnofflight").style.display = "block";
+            });
+    }
+
+    function turnOffLight() {
+        fetch('/light/off', { method: 'POST' })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById("turnonlight").style.display = "block";
+                document.getElementById("turnofflight").style.display = "none";
+            });
+    }
 
 
 

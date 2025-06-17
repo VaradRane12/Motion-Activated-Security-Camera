@@ -74,16 +74,16 @@
 
 
 <div class="col-md-3 col-sm-6">
-                <button id="turnonlight" class="btn btn-secondary w-100" onclick="turnOnLight()">
-                    <i class="bi bi-pause-circle me-2"></i>Turn On Light
-                </button>
-            </div>
+    <button id="turnonlight" class="btn btn-secondary w-100" onclick="turnOnLight()">
+        <i class="bi bi-lightbulb-off me-2"></i>Turn On Light
+    </button>
+</div>
 
-            <div class="col-md-3 col-sm-6">
-                <button id="turnofflight" class="btn btn-success w-100" onclick="turnOffLight()" style="display: none;">
-                    <i class="bi bi-play-circle me-2"></i>Turn Off Light
-                </button>
-            </div> 
+<div class="col-md-3 col-sm-6">
+    <button id="turnofflight" class="btn btn-success w-100" onclick="turnOffLight()">
+        <i class="bi bi-lightbulb me-2"></i>Turn Off Light
+    </button>
+</div>
 
 
             <div class="col-md-3 col-sm-6">
@@ -139,6 +139,8 @@
 <!-- Scripts -->
  <script>
     const surveillance_state = "{{ surveillance_state }}";
+    const lightStatus = "{{ device.status }}";  // 'ON' or 'OFF'
+
 </script>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
