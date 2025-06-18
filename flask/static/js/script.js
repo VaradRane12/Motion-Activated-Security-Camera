@@ -9,7 +9,7 @@ document.addEventListener("DOMContentLoaded", function () {
     } else {
         resumeSurveillanceUIOnly();
     }
-
+    console.log(lightStatus)
     if (lightStatus === "ON") {
     document.getElementById("turnonlight").style.display = "none";
     document.getElementById("turnofflight").style.display = "block";
@@ -51,7 +51,32 @@ function stopLiveFeed() {
         });
 }
 
+document.querySelector('form[action="/add_schedule"]').addEventListener('submit', function(e) {
+    e.preventDefault();
 
+    const form = e.target;
+    const formData = new FormData(form);
+
+    fetch('/add_schedule', {
+      method: 'POST',
+      body: formData
+    })
+    .then(res => res.json())
+    .then(data => {
+      const alertBox = document.getElementById('status-alert');
+      alertBox.classList.remove('d-none', 'alert-danger');
+      alertBox.classList.add('alert-success');
+      alertBox.textContent = data.message;
+
+      // Optional: Refresh the task list (requires JS logic or re-fetching from server)
+    })
+    .catch(err => {
+      const alertBox = document.getElementById('status-alert');
+      alertBox.classList.remove('d-none', 'alert-success');
+      alertBox.classList.add('alert-danger');
+      alertBox.textContent = 'Something went wrong while scheduling.';
+    });
+  });
 
     function turnOnLight() {
         fetch('/light/on', { method: 'POST' })

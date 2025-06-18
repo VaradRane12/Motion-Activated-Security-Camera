@@ -11,7 +11,7 @@ import time
 import subprocess
 import signal
 import psutil
-from models import Device
+from models import Device, ScheduledTask
 # Load .env variables
 load_dotenv()
 
@@ -37,10 +37,9 @@ s3_client = boto3.client(
 )
 
 def get_video_files():
-    try:
-        response = s3_client.list_objects_v2(Bucket=S3_BUCKET, Prefix=S3_PREFIX)
-    except:
-        print("cant get to s3")
+
+    response = s3_client.list_objects_v2(Bucket=S3_BUCKET, Prefix=S3_PREFIX)
+
     videos = []
     print(response["Contents"][-1])
     
@@ -142,12 +141,15 @@ def stop_live_feed():
 
 @app.route("/")
 def index():
-    videos = get_video_files()
-
+    try:
+        videos = get_video_files()
+    except Exception as e:
+        print("ERROR GETTING VIDEO: ",e)
     pause_flag_path = "/home/pi/motion_pause.flag"
     surveillance_state = "paused" if os.path.exists(pause_flag_path) else "resume"
     device = Device.query.filter_by(name="parking light").first()  # or get(id)
-    return render_template("index.html", videos=videos, surveillance_state=surveillance_state,device = device)
+    tasks=ScheduledTask.query.all()
+    return render_template("index.html", videos=videos, surveillance_state=surveillance_state,device = device,tasks = tasks)
 
 @app.route("/shutdown", methods=["POST"])
 def shutdown():
@@ -163,6 +165,7 @@ def arm_light():
 def pause_surveillance():
     open("/home/pi/motion_pause.flag", "w").close()
     return '', 204
+
 @app.route('/light/on', methods=['POST'])
 def light_on():
     device = device = db.session.get(Device, 1)
@@ -175,6 +178,24 @@ def light_on():
         return jsonify({"status":"failed"})
         
 
+@app.route('/add_schedule', methods=['POST'])
+def add_schedule():
+    time_input = request.form['time']
+    action = request.form['action']
+    device_name = 'parking light'
+
+    existing_task = ScheduledTask.query.filter_by(device_name=device_name, action=action).first()
+
+    if existing_task:
+        existing_task.time = time_input
+        message = "Existing schedule updated"
+    else:
+        new_task = ScheduledTask(time=time_input, action=action, device_name=device_name)
+        db.session.add(new_task)
+        message = "New schedule created"
+
+    db.session.commit()
+    return jsonify({"status": "Scheduled", "message": message})
 
 
 @app.route('/light/off', methods=['POST'])
@@ -183,7 +204,7 @@ def light_off():
 
     try:
         os.system('mosquitto_pub -h localhost -t home/light1 -m "OFF"')
-        device.status = 'ON'
+        device.status = 'OFF'
         db.session.commit()
         return jsonify({'status': 'off'})
     except:
