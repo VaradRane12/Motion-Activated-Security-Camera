@@ -50,9 +50,8 @@ def turn_off_light():
 def refresh_schedule():
     with app.app_context():
         schedule.clear()
-
-        task_on = ScheduledTask.query.filter_by(device_name="parking light", action="ON").first()
-        task_off = ScheduledTask.query.filter_by(device_name="parking light", action="OFF").first()
+        task_on = ScheduledTask.query.filter_by(device_name="parking light", action="turn_on").first()
+        task_off = ScheduledTask.query.filter_by(device_name="parking light", action="turn_off").first()
         print("Time On: ",task_on.time, "Time OFF: ",task_off.time)
         if task_on and task_on.time:
             schedule.every().day.at(task_on.time).do(turn_on_light)
