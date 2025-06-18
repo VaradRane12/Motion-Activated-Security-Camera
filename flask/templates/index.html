@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Security Camera System</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Bootstrap CSS CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <p id="debugState">Server thinks the system is: {{ surveillance_state }}</p>
+
+<div class="container py-4">
+    <!-- Header -->
+    <div class="main-header mb-4">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="mb-0">
+                    <i class="bi bi-shield-check me-3"></i>
+                    Security Camera System
+                </h1>
+                <p class="mb-0 mt-2 opacity-75">Real-time surveillance monitoring</p>
+            </div>
+            <div class="col-md-4 text-end">
+                <div id="systemStatus" class="system-status text-success">
+                    <i id="statusIcon" class="bi bi-circle-fill me-2"></i>
+                    <span id="statusText">System Online</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Control Panel -->
+    <div class="control-panel mb-4">
+        <h4 class="mb-3">
+            <i class="bi bi-gear-fill me-2"></i>
+            Control Panel
+        </h4>
+        <div class="row g-3">
+
+
+            <div class="col-md-3 col-sm-6">
+                <button class="btn btn-warning w-100" onclick="toggleArmLight()">
+                    <i class="bi bi-lightbulb me-2"></i>Arm Light
+                </button>
+            </div>
+
+            <div class="col-md-3 col-sm-6">
+                <button class="btn btn-danger w-100" onclick="toggleArmSiren()">
+                    <i class="bi bi-volume-up me-2"></i>Arm Siren
+                </button>
+            </div>
+
+            <div class="col-md-3 col-sm-6">
+                <button class="btn btn-success w-100" onclick="startLiveFeed()" data-bs-toggle="modal" data-bs-target="#liveFeedModal">
+                    <i class="bi bi-camera-video me-2"></i>Start Live Feed
+                </button>
+            </div>
+<div class="col-md-3 col-sm-6">
+                <button id="pauseBtn" class="btn btn-secondary w-100" onclick="pauseSurveillance()">
+                    <i class="bi bi-pause-circle me-2"></i>Pause Surveillance
+                </button>
+            </div>
+
+            <div class="col-md-3 col-sm-6">
+                <button id="resumeBtn" class="btn btn-success w-100" onclick="resumeSurveillance()" style="display: none;">
+                    <i class="bi bi-play-circle me-2"></i>Resume Surveillance
+                </button>
+            </div> 
+
+
+<div class="col-md-3 col-sm-6">
+    <button id="turnonlight" class="btn btn-secondary w-100" onclick="turnOnLight()">
+        <i class="bi bi-lightbulb-off me-2"></i>Turn On Light
+    </button>
+</div>
+
+<div class="col-md-3 col-sm-6">
+    <button id="turnofflight" class="btn btn-success w-100" onclick="turnOffLight()">
+        <i class="bi bi-lightbulb me-2"></i>Turn Off Light
+    </button>
+</div>
+
+
+            <div class="col-md-3 col-sm-6">
+                <button class="btn btn-outline-danger w-100" onclick="confirmShutdown()">
+                    <i class="bi bi-power me-2"></i>Shutdown
+                </button>
+            </div>
+        </div>
+    </div>
+
+<!-- Light Scheduler Form -->
+<div class="col-md-6 col-sm-12">
+    <form method="POST" action="/add_schedule" class="p-3 border rounded bg-light">
+        <h5 class="mb-3"><i class="bi bi-clock me-2"></i>Schedule Light</h5>
+        <div class="row g-2">
+            <div class="col-5">
+                <input type="time" name="time" class="form-control" required>
+            </div>
+            <div class="col-4">
+                <select name="action" class="form-select">
+                    <option value="turn_on">Turn On</option>
+                    <option value="turn_off">Turn Off</option>
+                </select>
+            </div>
+            <div class="col-3">
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="bi bi-plus-circle me-1"></i>Schedule
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+<div class="col-12 mt-3">
+    <h6><i class="bi bi-list-check me-2"></i>Scheduled Light Events</h6>
+    <ul class="list-group">
+        {% for task in tasks %}
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+            {{ task.time }} - {{ task.action.replace('_', ' ').capitalize() }}
+            <!-- Optionally: Add a delete button later -->
+        </li>
+        {% else %}
+        <li class="list-group-item text-muted">No scheduled tasks</li>
+        {% endfor %}
+    </ul>
+</div>
+
+    <!-- Camera Grid -->
+    <div class="row g-4">
+        {% for video in videos %}
+        <div class="col-xl-3 col-lg-4 col-md-6">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h6 class="card-title d-flex align-items-center">
+                        <span class="status-indicator me-2"></span>
+                        {{ video.name }}
+                    </h6>
+                    <video class="w-100" controls>
+                        <source src="{{ video.url }}" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Footer -->
+    <div class="mt-5 text-center text-muted small">
+        <i class="bi bi-info-circle me-2"></i>Secure surveillance system - All feeds encrypted
+    </div>
+</div>
+
+<!-- Live Feed Modal -->
+<div class="modal fade" id="liveFeedModal" tabindex="-1" aria-labelledby="liveFeedModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="liveFeedModalLabel">Live Camera Feed</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" onclick="stopLiveFeed()"></button>
+      </div>
+      <div class="modal-body text-center">
+        <img id="liveFeedImg" src="" width="100%" />
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Scripts -->
+ <script>
+    const surveillance_state = "{{ surveillance_state }}";
+    const lightStatus = "{{ device.status }}";  // 'ON' or 'OFF'
+
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="{{ url_for('static', filename='js/script.js') }}"></script>
+
+</body>
+</html>
