@@ -163,6 +163,7 @@ def arm_light():
 def pause_surveillance():
     open("/home/pi/motion_pause.flag", "w").close()
     return '', 204
+
 @app.route('/light/on', methods=['POST'])
 def light_on():
     device = device = db.session.get(Device, 1)
@@ -183,7 +184,7 @@ def light_off():
 
     try:
         os.system('mosquitto_pub -h localhost -t home/light1 -m "OFF"')
-        device.status = 'ON'
+        device.status = 'OFF'
         db.session.commit()
         return jsonify({'status': 'off'})
     except:
