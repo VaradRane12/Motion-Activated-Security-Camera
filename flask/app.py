@@ -185,7 +185,7 @@ def add_schedule():
     new_task = ScheduledTask(time=time_input, action=action)
     db.session.add(new_task)
     db.session.commit()
-
+    return jsonify({"status": "Scheduled", "message": "The action is Scheduled"})
 
 @app.route('/light/off', methods=['POST'])
 def light_off():
