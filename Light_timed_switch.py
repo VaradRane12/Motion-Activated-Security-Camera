@@ -8,7 +8,7 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////home/pi/Motion-Activated-Security-Camera/flask/instance/lights.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////home/pi/test/Motion-Activated-Security-Camera/flask/instance/lights.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
@@ -35,16 +35,16 @@ def update_device_status(name, state):
 def turn_on_light():
     os.system('mosquitto_pub -h localhost -t home/light1 -m "ON"')
     print("Light turned ON at 18:30")
-    update_device_status("light1", "ON")
+    update_device_status("parking light", "ON")
 
 def turn_off_light():
     os.system('mosquitto_pub -h localhost -t home/light1 -m "OFF"')
     print("Light turned OFF at 05:30")
-    update_device_status("light1", "OFF")
+    update_device_status("parking light", "OFF")
 
 # Scheduler
-schedule.every().day.at("18:30").do(turn_on_light)
-schedule.every().day.at("05:30").do(turn_off_light)
+schedule.every().day.at("14:35").do(turn_on_light)
+schedule.every().day.at("14:36").do(turn_off_light)
 
 print("MQTT Light Scheduler running...")
 
