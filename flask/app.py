@@ -181,7 +181,7 @@ def light_on():
 def add_schedule():
     time_input = request.form['time']
     action = request.form['action']
-    device_name = request.form['parking light']
+    device_name = 'parking light'
 
     existing_task = ScheduledTask.query.filter_by(device_name=device_name, action=action).first()
 
