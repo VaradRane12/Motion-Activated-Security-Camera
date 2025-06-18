@@ -10,6 +10,6 @@ class Device(db.Model):
     status = db.Column(db.String(10), default='OFF')  
 class ScheduledTask(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    device_name = db.Column(db.String(10), default = " ")
+    device_name = db.Column(db.String(100), default = " ")
     time = db.Column(db.String(5))  
     action = db.Column(db.String(20))  
