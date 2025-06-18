@@ -8,7 +8,7 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///flask/instance/lights.db'  # relative to your project root
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////home/pi/Motion-Activated-Security-Camera/flask/instance/lights.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
