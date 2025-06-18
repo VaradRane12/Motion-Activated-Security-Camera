@@ -9,7 +9,7 @@ document.addEventListener("DOMContentLoaded", function () {
     } else {
         resumeSurveillanceUIOnly();
     }
-
+    console.log(lightStatus)
     if (lightStatus === "ON") {
     document.getElementById("turnonlight").style.display = "none";
     document.getElementById("turnofflight").style.display = "block";
