@@ -11,7 +11,7 @@ import time
 import subprocess
 import signal
 import psutil
-from models import Device
+from models import Device, ScheduledTask
 # Load .env variables
 load_dotenv()
 
@@ -147,7 +147,8 @@ def index():
     pause_flag_path = "/home/pi/motion_pause.flag"
     surveillance_state = "paused" if os.path.exists(pause_flag_path) else "resume"
     device = Device.query.filter_by(name="parking light").first()  # or get(id)
-    return render_template("index.html", videos=videos, surveillance_state=surveillance_state,device = device)
+    tasks=ScheduledTask.query.all()
+    return render_template("index.html", videos=videos, surveillance_state=surveillance_state,device = device,tasks = tasks)
 
 @app.route("/shutdown", methods=["POST"])
 def shutdown():
@@ -176,6 +177,14 @@ def light_on():
         return jsonify({"status":"failed"})
         
 
+@app.route('/add_schedule', methods=['POST'])
+def add_schedule():
+    time_input = request.form['time']
+    action = request.form['action']
+
+    new_task = ScheduledTask(time=time_input, action=action)
+    db.session.add(new_task)
+    db.session.commit()
 
 
 @app.route('/light/off', methods=['POST'])

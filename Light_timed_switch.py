@@ -13,6 +13,12 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 
+class ScheduledTask(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    device_name = db.Column(db.String(10), default = " ")
+    time = db.Column(db.String(5))
+    action = db.Column(db.String(20))
+
 class Device(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(80))
@@ -43,8 +49,14 @@ def turn_off_light():
     update_device_status("parking light", "OFF")
 
 # Scheduler
-schedule.every().day.at("14:35").do(turn_on_light)
-schedule.every().day.at("14:36").do(turn_off_light)
+task_on = ScheduledTask.query.filter_by(device_name="parking light",action = "ON").first()
+task_on.time.strftime("%H:%M")
+
+task_off = ScheduledTask.query.filter_by(device_name = "parking light", action = "OFF").first()
+
+task_off.time.strftime("%H:%M")
+schedule.every().day.at(task_on.time).do(turn_on_light)
+schedule.every().day.at(task_off.time).do(turn_off_light)
 
 print("MQTT Light Scheduler running...")
 
