@@ -37,10 +37,9 @@ s3_client = boto3.client(
 )
 
 def get_video_files():
-    try:
-        response = s3_client.list_objects_v2(Bucket=S3_BUCKET, Prefix=S3_PREFIX)
-    except:
-        print("cant get to s3")
+
+    response = s3_client.list_objects_v2(Bucket=S3_BUCKET, Prefix=S3_PREFIX)
+
     videos = []
     print(response["Contents"][-1])
     
@@ -142,8 +141,10 @@ def stop_live_feed():
 
 @app.route("/")
 def index():
-    videos = get_video_files()
-
+    try:
+        videos = get_video_files()
+    except Exception as e:
+        print("ERROR GETTING VIDEO: ",e)
     pause_flag_path = "/home/pi/motion_pause.flag"
     surveillance_state = "paused" if os.path.exists(pause_flag_path) else "resume"
     device = Device.query.filter_by(name="parking light").first()  # or get(id)
