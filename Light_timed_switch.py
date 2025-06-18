@@ -15,7 +15,7 @@ db = SQLAlchemy(app)
 
 class ScheduledTask(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    device_name = db.Column(db.String(10), default = " ")
+    device_name = db.Column(db.String(10), default=" ")
     time = db.Column(db.String(5))
     action = db.Column(db.String(20))
 
@@ -29,7 +29,6 @@ def update_device_status(name, state):
     with app.app_context():
         device = Device.query.filter_by(name=name).first()
         if not device:
-            # Create device if it doesn't exist
             device = Device(name=name, status=state, last_updated=datetime.utcnow())
             db.session.add(device)
         else:
@@ -40,23 +39,34 @@ def update_device_status(name, state):
 
 def turn_on_light():
     os.system('mosquitto_pub -h localhost -t home/light1 -m "ON"')
-    print("Light turned ON at 18:30")
+    print("Light turned ON")
     update_device_status("parking light", "ON")
 
 def turn_off_light():
     os.system('mosquitto_pub -h localhost -t home/light1 -m "OFF"')
-    print("Light turned OFF at 05:30")
+    print("Light turned OFF")
     update_device_status("parking light", "OFF")
 
-# Scheduler
-task_on = ScheduledTask.query.filter_by(device_name="parking light",action = "ON").first()
-task_on.time.strftime("%H:%M")
+def refresh_schedule():
+    with app.app_context():
+        schedule.clear()
 
-task_off = ScheduledTask.query.filter_by(device_name = "parking light", action = "OFF").first()
+        task_on = ScheduledTask.query.filter_by(device_name="parking light", action="ON").first()
+        task_off = ScheduledTask.query.filter_by(device_name="parking light", action="OFF").first()
 
-task_off.time.strftime("%H:%M")
-schedule.every().day.at(task_on.time).do(turn_on_light)
-schedule.every().day.at(task_off.time).do(turn_off_light)
+        if task_on and task_on.time:
+            schedule.every().day.at(task_on.time).do(turn_on_light)
+            print(f"Scheduled ON at {task_on.time}")
+
+        if task_off and task_off.time:
+            schedule.every().day.at(task_off.time).do(turn_off_light)
+            print(f"Scheduled OFF at {task_off.time}")
+
+# Initial load
+refresh_schedule()
+
+# Reload the schedule every 1 minute
+schedule.every(1).minutes.do(refresh_schedule)
 
 print("MQTT Light Scheduler running...")
 
