@@ -51,30 +51,31 @@ function stopLiveFeed() {
         });
 }
 
-document.querySelector('form[action="/add_schedule"]').addEventListener('submit', function(e) {
-    e.preventDefault();
+document.addEventListener("DOMContentLoaded", function () {
+    const form = document.getElementById('schedule-form');
 
-    const form = e.target;
-    const formData = new FormData(form);
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
 
-    fetch('/add_schedule', {
-      method: 'POST',
-      body: formData
-    })
-    .then(res => res.json())
-    .then(data => {
-      const alertBox = document.getElementById('status-alert');
-      alertBox.classList.remove('d-none', 'alert-danger');
-      alertBox.classList.add('alert-success');
-      alertBox.textContent = data.message;
+      const formData = new FormData(form);
 
-      // Optional: Refresh the task list (requires JS logic or re-fetching from server)
-    })
-    .catch(err => {
-      const alertBox = document.getElementById('status-alert');
-      alertBox.classList.remove('d-none', 'alert-success');
-      alertBox.classList.add('alert-danger');
-      alertBox.textContent = 'Something went wrong while scheduling.';
+      fetch('/add_schedule', {
+        method: 'POST',
+        body: formData
+      })
+      .then(res => res.json())
+      .then(data => {
+        const alertBox = document.getElementById('status-alert');
+        alertBox.classList.remove('d-none', 'alert-danger');
+        alertBox.classList.add('alert-success');
+        alertBox.textContent = data.message;
+      })
+      .catch(err => {
+        const alertBox = document.getElementById('status-alert');
+        alertBox.classList.remove('d-none', 'alert-success');
+        alertBox.classList.add('alert-danger');
+        alertBox.textContent = 'Something went wrong while scheduling.';
+      });
     });
   });
 
