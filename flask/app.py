@@ -181,12 +181,21 @@ def light_on():
 def add_schedule():
     time_input = request.form['time']
     action = request.form['action']
+    device_name = request.form['parking light']
 
-    new_task = ScheduledTask(time=time_input, action=action)
-    db.session.add(new_task)
+    existing_task = ScheduledTask.query.filter_by(device_name=device_name, action=action).first()
+
+    if existing_task:
+        existing_task.time = time_input
+        message = "Existing schedule updated"
+    else:
+        new_task = ScheduledTask(time=time_input, action=action, device_name=device_name)
+        db.session.add(new_task)
+        message = "New schedule created"
+
     db.session.commit()
-    return "a"
-    return jsonify({"status": "Scheduled", "message": "The action is Scheduled"})
+    return jsonify({"status": "Scheduled", "message": message})
+
 
 @app.route('/light/off', methods=['POST'])
 def light_off():
