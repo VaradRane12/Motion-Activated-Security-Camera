@@ -109,8 +109,9 @@ def convert_and_upload(h264_path, timestamp):
         ], check=True)
         print(f"[THREAD-{threading.get_ident()}] Conversion done: {mp4_path}")
 
-    except:
-        pass  # Replace with logging
+    except subprocess.CalledProcessError as e:
+        print(f"[THREAD-{threading.get_ident()}] ffmpeg conversion failed: {e}")
+        return
         
         #DELETING OLD FILES
     try: #Delete Try
