@@ -2,6 +2,8 @@
 let liveFeedActive = false;
 let lightArmed = false;
 let sirenArmed = false;
+
+
 // === INIT ON LOAD ===
 document.addEventListener("DOMContentLoaded", function () {
     if (surveillance_state === "paused") {
