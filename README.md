@@ -5,7 +5,7 @@ A DIY motion-triggered surveillance system using Raspberry Pi and NodeMCU. This 
 ## 🚀 Features
 - 🎥 Motion-triggered video/image capture
 - 🌐 Flask web interface to control and monitor
-- ☁️ AWS S3 integration for cloud storage
+- ☁️ AWS S3 integration for cloud storage 
 - 🔌 NodeMCU-based light & PIR sensor logic
 - 📹 Raspberry Pi camera motion detection
 - 🕹️ Remote pause/resume of motion detection
