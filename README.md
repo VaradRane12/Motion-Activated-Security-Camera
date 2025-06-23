@@ -1,4 +1,4 @@
-# 🛡️ Motion‑Activated Security Camera
+# Motion‑Activated Security Camera
 
 A DIY motion-triggered surveillance system using Raspberry Pi and NodeMCU. This project captures video/images on motion detection, uploads to AWS or your local server, and provides a web interface using Flask.
 
