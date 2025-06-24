@@ -1,37 +1,15 @@
 import os
 import boto3
-from flask import Flask, render_template, request, jsonify
+import logging
+from flask import Flask, render_template, request, jsonify, Response
 from dotenv import load_dotenv
 from flask_sqlalchemy import SQLAlchemy
-from flask import Response
 from picamera2 import Picamera2
 import cv2
-from models import db
-import time
 import subprocess
 import signal
-import psutil
-from models import Device, ScheduledTask
+from models import db, Device, ScheduledTask
 from discord_logger import DiscordHandler
-
-# Setup logging
-logger = logging.getLogger('flask_app')
-logger.setLevel(logging.DEBUG)
-
-# Console log
-console_handler = logging.StreamHandler()
-console_handler.setLevel(logging.DEBUG)
-logger.addHandler(console_handler)
-
-# Discord log
-DISCORD_WEBHOOK_URL = os.getenv("DISCORD_WEBHOOK_URL")  # store it in your .env file
-if DISCORD_WEBHOOK_URL:
-    discord_handler = DiscordHandler(DISCORD_WEBHOOK_URL)
-    discord_handler.setLevel(logging.ERROR)
-    formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
-    discord_handler.setFormatter(formatter)
-    logger.addHandler(discord_handler)
-
 
 # Load .env variables
 load_dotenv()
@@ -42,14 +20,29 @@ app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{os.path.join(basedir, "inst
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db.init_app(app)
-# Load config from .env
+
+# Setup logging
+logger = logging.getLogger('flask_app')
+logger.setLevel(logging.DEBUG)
+
+console_handler = logging.StreamHandler()
+console_handler.setLevel(logging.DEBUG)
+logger.addHandler(console_handler)
+
+DISCORD_WEBHOOK_URL = os.getenv("DISCORD_WEBHOOK_URL")
+if DISCORD_WEBHOOK_URL:
+    discord_handler = DiscordHandler(DISCORD_WEBHOOK_URL, level=logging.ERROR)
+    formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+    discord_handler.setFormatter(formatter)
+    logger.addHandler(discord_handler)
+
+# AWS Config
 AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
 AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
 AWS_REGION = os.getenv("AWS_REGION")
 S3_BUCKET = os.getenv("S3_BUCKET_NAME")
 S3_PREFIX = os.getenv("S3_PREFIX", "")
 
-# Init boto3 client
 s3_client = boto3.client(
     "s3",
     region_name=AWS_REGION,
@@ -58,179 +51,131 @@ s3_client = boto3.client(
 )
 
 def get_video_files():
-
-    response = s3_client.list_objects_v2(Bucket=S3_BUCKET, Prefix=S3_PREFIX)
-
     videos = []
-    print(response["Contents"][-1])
-    
-    if 'Contents' in response:
-        # First, filter and collect video objects with their metadata
-        video_objects = []
-        for obj in response['Contents']:
-            key = obj['Key']
-            if key.endswith(".mp4"):
-                video_objects.append(obj)
-        
-        # Sort video objects by LastModified date (newest first)
-        video_objects.sort(key=lambda x: x['LastModified'], reverse=True)
-        
-        # Generate presigned URLs for sorted videos
-        for obj in video_objects:
-            key = obj['Key']
-            presigned_url = s3_client.generate_presigned_url(
-                'get_object',
-                Params={'Bucket': S3_BUCKET, 'Key': key},
-                ExpiresIn=3600  # 1 hour
-            )
-            # Extract filename from key for display
-            filename = key.split('/')[-1] if '/' in key else key
-            videos.append({
-                'name': filename,
-                'full_key': key,
-                'url': presigned_url,
-                'last_modified': obj['LastModified'],
-                'size': obj['Size']
-            })
-    
-    return videos
+    try:
+        response = s3_client.list_objects_v2(Bucket=S3_BUCKET, Prefix=S3_PREFIX)
+        if 'Contents' in response:
+            video_objects = [obj for obj in response['Contents'] if obj['Key'].endswith(".mp4")]
+            video_objects.sort(key=lambda x: x['LastModified'], reverse=True)
 
+            for obj in video_objects:
+                key = obj['Key']
+                presigned_url = s3_client.generate_presigned_url(
+                    'get_object',
+                    Params={'Bucket': S3_BUCKET, 'Key': key},
+                    ExpiresIn=3600
+                )
+                filename = key.split('/')[-1]
+                videos.append({
+                    'name': filename,
+                    'full_key': key,
+                    'url': presigned_url,
+                    'last_modified': obj['LastModified'],
+                    'size': obj['Size']
+                })
+    except Exception as e:
+        logger.error(f"Failed to fetch video files from S3: {e}")
+    return videos
 
 MOTION_PID_FILE = "/home/pi/motion_pid"
 LIVE_PID_FILE = "/home/pi/live_pid"
 
 def kill_pid_from_file(file):
     if os.path.exists(file):
-        with open(file, "r") as f:
-            pid = int(f.read().strip())
-            try:
+        try:
+            with open(file, "r") as f:
+                pid = int(f.read().strip())
                 os.kill(pid, signal.SIGTERM)
                 return True
-            except ProcessLookupError:
-                return False
+        except Exception as e:
+            logger.error(f"Failed to kill PID from {file}: {e}")
+            return False
+    return False
+
 picam2 = None
+
 @app.route("/start_live_feed", methods=["POST"])
 def start_live_feed():
     kill_pid_from_file(MOTION_PID_FILE)
     return jsonify({'message': 'Surveillance started'})
 
-    # p = subprocess.Popen(["python3", "/home/pi/Motion-Activated-Security-Camera/live_feed.py"])
-    # with open(LIVE_PID_FILE, "w") as f:
-    #     f.write(str(p.pid))
-
-    # return "", 204
-
 @app.route('/video_feed')
 def video_feed():
     global picam2
     if picam2 is None:
-
-        picam2 = Picamera2()
-        picam2.configure(picam2.create_video_configuration(main={"size": (640, 480)}))
-        picam2.start()
+        try:
+            picam2 = Picamera2()
+            picam2.configure(picam2.create_video_configuration(main={"size": (640, 480)}))
+            picam2.start()
+        except Exception as e:
+            logger.error(f"Failed to start camera feed: {e}")
+            return "Camera Error", 500
 
     def generate_frames():
         while True:
-            frame = picam2.capture_array()
-            frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
-            ret, buffer = cv2.imencode('.jpg', frame)
-            if not ret:
-                continue
-            frame = buffer.tobytes()
-
-            yield (b'--frame\r\n'
-                   b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+            try:
+                frame = picam2.capture_array()
+                frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
+                ret, buffer = cv2.imencode('.jpg', frame)
+                if not ret:
+                    continue
+                yield (b'--frame\r\nContent-Type: image/jpeg\r\n\r\n' + buffer.tobytes() + b'\r\n')
+            except Exception as e:
+                logger.error(f"Error in video frame generation: {e}")
+                break
 
     return Response(generate_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 @app.route("/stop_live_feed", methods=["POST"])
 def stop_live_feed():
     global picam2
-    if picam2 is not None:
-        try:
+    try:
+        if picam2:
             picam2.stop()
             picam2.close()
             picam2 = None
-        except Exception as e:
-            print(f"error: {e}")
-    p = subprocess.Popen(["python3", "/home/pi/testing_branches/Motion-Activated-Security-Camera/script.py"])
-    with open(MOTION_PID_FILE, "w") as f:
-        f.write(str(p.pid))
+    except Exception as e:
+        logger.error(f"Error stopping camera: {e}")
+
+    try:
+        p = subprocess.Popen(["python3", "/home/pi/testing_branches/Motion-Activated-Security-Camera/script.py"])
+        with open(MOTION_PID_FILE, "w") as f:
+            f.write(str(p.pid))
+    except Exception as e:
+        logger.error(f"Error starting motion script: {e}")
 
     return "", 204
-
 
 @app.route("/")
 def index():
     try:
         videos = get_video_files()
     except Exception as e:
-        print("ERROR GETTING VIDEO: ",e)
+        logger.error(f"Error getting videos: {e}")
+        videos = []
     pause_flag_path = "/home/pi/motion_pause.flag"
     surveillance_state = "paused" if os.path.exists(pause_flag_path) else "resume"
-    device = Device.query.filter_by(name="parking light").first()  # or get(id)
-    tasks=ScheduledTask.query.all()
-    return render_template("index.html", videos=videos, surveillance_state=surveillance_state,device = device,tasks = tasks)
+    device = Device.query.filter_by(name="parking light").first()
+    tasks = ScheduledTask.query.all()
+    return render_template("index.html", videos=videos, surveillance_state=surveillance_state, device=device, tasks=tasks)
 
 @app.route("/shutdown", methods=["POST"])
 def shutdown():
-    print("Shutdown requested")
+    logger.info("Shutdown requested")
     return jsonify({"status": "Shutdown initiated", "message": "System shutting down safely..."})
 
 @app.route("/arm_light", methods=["POST"])
 def arm_light():
-    print("Light armed")
+    logger.info("Light armed")
     return jsonify({"status": "Light armed", "message": "Motion detection light activated"})
 
 @app.route('/pause', methods=['POST'])
 def pause_surveillance():
-    open("/home/pi/motion_pause.flag", "w").close()
+    try:
+        open("/home/pi/motion_pause.flag", "w").close()
+    except Exception as e:
+        logger.error(f"Failed to pause surveillance: {e}")
     return '', 204
-
-@app.route('/light/on', methods=['POST'])
-def light_on():
-    device = device = db.session.get(Device, 1)
-    try:
-        os.system('mosquitto_pub -h localhost -t home/light1 -m "ON"')
-        device.status = 'ON'
-        db.session.commit()
-        return jsonify({'status': 'on'})
-    except:
-        return jsonify({"status":"failed"})
-        
-
-@app.route('/add_schedule', methods=['POST'])
-def add_schedule():
-    time_input = request.form['time']
-    action = request.form['action']
-    device_name = 'parking light'
-
-    existing_task = ScheduledTask.query.filter_by(device_name=device_name, action=action).first()
-
-    if existing_task:
-        existing_task.time = time_input
-        message = "Existing schedule updated"
-    else:
-        new_task = ScheduledTask(time=time_input, action=action, device_name=device_name)
-        db.session.add(new_task)
-        message = "New schedule created"
-
-    db.session.commit()
-    return jsonify({"status": "Scheduled", "message": message})
-
-
-@app.route('/light/off', methods=['POST'])
-def light_off():
-    device = device = db.session.get(Device, 1)
-
-    try:
-        os.system('mosquitto_pub -h localhost -t home/light1 -m "OFF"')
-        device.status = 'OFF'
-        db.session.commit()
-        return jsonify({'status': 'off'})
-    except:
-        return jsonify({"status":"failed"})
-        
 
 @app.route('/resume', methods=['POST'])
 def resume_surveillance():
@@ -238,11 +183,58 @@ def resume_surveillance():
         os.remove("/home/pi/motion_pause.flag")
     except FileNotFoundError:
         pass
+    except Exception as e:
+        logger.error(f"Failed to resume surveillance: {e}")
     return '', 204
+
+@app.route('/light/on', methods=['POST'])
+def light_on():
+    device = db.session.get(Device, 1)
+    try:
+        os.system('mosquitto_pub -h localhost -t home/light1 -m "ON"')
+        device.status = 'ON'
+        db.session.commit()
+        return jsonify({'status': 'on'})
+    except Exception as e:
+        logger.error(f"Failed to turn light on: {e}")
+        return jsonify({"status": "failed"})
+
+@app.route('/light/off', methods=['POST'])
+def light_off():
+    device = db.session.get(Device, 1)
+    try:
+        os.system('mosquitto_pub -h localhost -t home/light1 -m "OFF"')
+        device.status = 'OFF'
+        db.session.commit()
+        return jsonify({'status': 'off'})
+    except Exception as e:
+        logger.error(f"Failed to turn light off: {e}")
+        return jsonify({"status": "failed"})
+
+@app.route('/add_schedule', methods=['POST'])
+def add_schedule():
+    time_input = request.form['time']
+    action = request.form['action']
+    device_name = 'parking light'
+
+    try:
+        existing_task = ScheduledTask.query.filter_by(device_name=device_name, action=action).first()
+        if existing_task:
+            existing_task.time = time_input
+            message = "Existing schedule updated"
+        else:
+            new_task = ScheduledTask(time=time_input, action=action, device_name=device_name)
+            db.session.add(new_task)
+            message = "New schedule created"
+        db.session.commit()
+        return jsonify({"status": "Scheduled", "message": message})
+    except Exception as e:
+        logger.error(f"Failed to add schedule: {e}")
+        return jsonify({"status": "failed", "message": str(e)})
 
 @app.route("/arm_siren", methods=["POST"])
 def arm_siren():
-    print("Siren armed")
+    logger.info("Siren armed")
     return jsonify({"status": "Siren armed", "message": "Motion detection siren activated"})
 
 if __name__ == "__main__":
