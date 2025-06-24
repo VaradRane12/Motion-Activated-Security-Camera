@@ -1,4 +1,4 @@
-#include <ESP8266WiFi.h>
+ #include <ESP8266WiFi.h>
 #include <PubSubClient.h>
 
 const char* ssid = "Varad-2";
@@ -22,7 +22,7 @@ void setup_wifi() {
     Serial.print(".");
   }
 
-  Serial.println("\nWiFi connected!");
+  Serial.println("\nWiFiconnected!");
   Serial.print("IP address: ");
   Serial.println(WiFi.localIP());
 }

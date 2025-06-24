@@ -6,19 +6,45 @@ let sirenArmed = false;
 
 // === INIT ON LOAD ===
 document.addEventListener("DOMContentLoaded", function () {
+    // Surveillance status init
     if (surveillance_state === "paused") {
         pauseSurveillanceUIOnly();
     } else {
         resumeSurveillanceUIOnly();
     }
-    console.log(lightStatus)
+
+    // Light status
     if (lightStatus === "ON") {
-    document.getElementById("turnonlight").style.display = "none";
-    document.getElementById("turnofflight").style.display = "block";
+        document.getElementById("turnonlight").style.display = "none";
+        document.getElementById("turnofflight").style.display = "block";
     } else {
         document.getElementById("turnonlight").style.display = "block";
         document.getElementById("turnofflight").style.display = "none";
     }
+
+    // Schedule form listener
+    const form = document.getElementById('schedule-form');
+    form?.addEventListener('submit', function (e) {
+        e.preventDefault();
+        const formData = new FormData(form);
+        fetch('/add_schedule', {
+            method: 'POST',
+            body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+            const alertBox = document.getElementById('status-alert');
+            alertBox.classList.remove('d-none', 'alert-danger');
+            alertBox.classList.add('alert-success');
+            alertBox.textContent = data.message;
+        })
+        .catch(() => {
+            const alertBox = document.getElementById('status-alert');
+            alertBox.classList.remove('d-none', 'alert-success');
+            alertBox.classList.add('alert-danger');
+            alertBox.textContent = 'Something went wrong while scheduling.';
+        });
+    });
 });
 
 
@@ -53,33 +79,7 @@ function stopLiveFeed() {
         });
 }
 
-document.addEventListener("DOMContentLoaded", function () {
-    const form = document.getElementById('schedule-form');
 
-    form.addEventListener('submit', function(e) {
-      e.preventDefault();
-
-      const formData = new FormData(form);
-
-      fetch('/add_schedule', {
-        method: 'POST',
-        body: formData
-      })
-      .then(res => res.json())
-      .then(data => {
-        const alertBox = document.getElementById('status-alert');
-        alertBox.classList.remove('d-none', 'alert-danger');
-        alertBox.classList.add('alert-success');
-        alertBox.textContent = data.message;
-      })
-      .catch(err => {
-        const alertBox = document.getElementById('status-alert');
-        alertBox.classList.remove('d-none', 'alert-success');
-        alertBox.classList.add('alert-danger');
-        alertBox.textContent = 'Something went wrong while scheduling.';
-      });
-    });
-  });
 
     function turnOnLight() {
         fetch('/light/on', { method: 'POST' })
@@ -194,8 +194,7 @@ systemStatus.style.background = "rgba(56, 161, 105, 0.2)";
 
 // === UI-ONLY STATUS REFLECTORS (initial on load) ===
 function pauseSurveillanceUIOnly() {
-    console.log("In pause UI")
-
+    console.log("In pause UI");
     const pauseBtn = document.getElementById("pauseBtn");
     const resumeBtn = document.getElementById("resumeBtn");
     const systemStatus = document.getElementById("systemStatus");
@@ -204,8 +203,8 @@ function pauseSurveillanceUIOnly() {
 
     if (!pauseBtn || !resumeBtn) return;
 
-    pauseBtn.style.display = "none";
-    resumeBtn.style.display = "block";
+    pauseBtn.classList.add("d-none");
+    resumeBtn.classList.remove("d-none");
 
     systemStatus.classList.remove("text-success");
     systemStatus.classList.add("text-danger");
@@ -216,8 +215,9 @@ function pauseSurveillanceUIOnly() {
     systemStatus.style.background = "rgba(229, 62, 62, 0.2)";
 }
 
+
 function resumeSurveillanceUIOnly() {
-    console.log("Inresume UI")
+    console.log("Inresume UI");
     const pauseBtn = document.getElementById("pauseBtn");
     const resumeBtn = document.getElementById("resumeBtn");
     const systemStatus = document.getElementById("systemStatus");
@@ -226,8 +226,8 @@ function resumeSurveillanceUIOnly() {
 
     if (!pauseBtn || !resumeBtn) return;
 
-    pauseBtn.style.display = "block";
-    resumeBtn.style.display = "none";
+    pauseBtn.classList.remove("d-none");
+    resumeBtn.classList.add("d-none");
 
     systemStatus.classList.remove("text-danger");
     systemStatus.classList.add("text-success");

@@ -12,6 +12,27 @@ import subprocess
 import signal
 import psutil
 from models import Device, ScheduledTask
+from discord_logger import DiscordHandler
+
+# Setup logging
+logger = logging.getLogger('flask_app')
+logger.setLevel(logging.DEBUG)
+
+# Console log
+console_handler = logging.StreamHandler()
+console_handler.setLevel(logging.DEBUG)
+logger.addHandler(console_handler)
+
+# Discord log
+DISCORD_WEBHOOK_URL = os.getenv("DISCORD_WEBHOOK_URL")  # store it in your .env file
+if DISCORD_WEBHOOK_URL:
+    discord_handler = DiscordHandler(DISCORD_WEBHOOK_URL)
+    discord_handler.setLevel(logging.ERROR)
+    formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+    discord_handler.setFormatter(formatter)
+    logger.addHandler(discord_handler)
+
+
 # Load .env variables
 load_dotenv()
 
