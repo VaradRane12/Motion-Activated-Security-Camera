@@ -108,7 +108,7 @@ UPLOAD_TO_AWS = True
 | Buttons not toggling | Ensure JS and Flask state variables are aligned         |
 
 ## 📷 Screenshots / Media
-*(Add wiring diagrams, screenshots, or demo videos here later)*
+
 
 ## 📜 License
 MIT License  
