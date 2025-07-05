@@ -2,7 +2,7 @@
 #include <PubSubClient.h>
 
 // Wi-Fi and MQTT Configuration
-const char* ssid = "Varad-2";
+const char* ssid = "VARAD";
 const char* password = "Adventure4@4242";
 const char* mqtt_server = "192.168.1.12";
 const int mqtt_port = 1883;
