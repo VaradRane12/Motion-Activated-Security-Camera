@@ -51,11 +51,9 @@ class InfoFilter(logging.Filter):
 class ErrorFilter(logging.Filter):
     def filter(self, record):
         return record.levelno >= logging.ERROR
-def log_general(message):
-    if WEBHOOK_GENERAL:
-        logger.info(f"[GENERAL] {message}")
-
+    
 # Setup logging
+# Logging Setup
 logger = logging.getLogger("MotionLogger")
 logger.setLevel(logging.DEBUG)
 
@@ -77,21 +75,31 @@ if WEBHOOK_ERROR:
     error_handler.setFormatter(formatter)
     logger.addHandler(error_handler)
 
+# General Logger
+logger_general = logging.getLogger("MotionGeneral")
+logger_general.setLevel(logging.INFO)
+
 if WEBHOOK_GENERAL:
     general_handler = DiscordHandler(WEBHOOK_GENERAL, level=logging.INFO)
     general_handler.setFormatter(formatter)
-    logger.addHandler(general_handler)
+    general_handler.addFilter(InfoFilter())  # Optional, filters to INFO/WARNING only
+    logger_general.addHandler(general_handler)
 
-# Redirect stdout/stderr to logger
-class PrintLogger:
-    def write(self, message):
-        if message.strip():
-            logger.info(message.strip())
-    def flush(self):
-        pass
+def log_general(message):
+    if WEBHOOK_GENERAL:
+        logger_general.info(message)
 
-sys.stdout = PrintLogger()
-sys.stderr = PrintLogger()
+
+# # Redirect stdout/stderr to logger
+# class PrintLogger:
+#     def write(self, message):
+#         if message.strip():
+#             logger.info(message.strip())
+#     def flush(self):
+#         pass
+
+# sys.stdout = PrintLogger()
+# sys.stderr = PrintLogger()
 
 # GPIO setup
 LED_PIN = 17
@@ -161,20 +169,20 @@ def convert_and_upload(h264_path, timestamp):
             s3_key = f"motion_videos/{os.path.basename(file)}"
             s3_client.upload_file(file, bucket_name, s3_key)
             os.remove(file)
-            # logger.info(f"Uploaded from offline: {file}")
+            logger.info(f"Uploaded from offline: {file}")
             print(f"Uploaded from offline: {file}")
 
         s3_key = f"motion_videos/{timestamp}.mp4"
         s3_client.upload_file(mp4_path, bucket_name, s3_key)
         os.remove(mp4_path)
-        # logger.info(f"Uploaded: {s3_key}")
+        logger.info(f"Uploaded: {s3_key}")
         print(f"Uploaded: {s3_key}")
     except Exception as e:
         offline_dir = os.path.join(os.path.expanduser("~"), "Desktop", "offline_storage")
         os.makedirs(offline_dir, exist_ok=True)
         offline_path = os.path.join(offline_dir, f"{timestamp}.mp4")
         shutil.move(mp4_path, offline_path)
-        # logger.info(f"No Internet: Saved Offline: {s3_key}")
+        logger.info(f"No Internet: Saved Offline: {s3_key}")
 
         logger.error(f"Upload failed, saved offline: {offline_path}, Error: {e}")
 
@@ -191,7 +199,6 @@ motion_threshold_area = 1000
 
 while True:
     if os.path.exists(PAUSE_FLAG_PATH):
-        logger.gene
         print("Motion detection paused.")
         time.sleep(1)
         continue
@@ -217,6 +224,7 @@ while True:
     if motion_detected and (current_time - last_motion_time) > cooldown_after_recording:
         threading.Thread(target=led_Blink, args=(LED_PIN,)).start()
         print("Motion detected. Starting recording...")
+        log_general("Motion Detected!!!")
         timestamp = datetime.now().strftime("%y%b%d_%H-%M-%S")
         h264_path = f"/home/pi/Desktop/{timestamp}.h264"
         output = FileOutput(h264_path)

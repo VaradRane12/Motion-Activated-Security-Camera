@@ -11,15 +11,20 @@ WiFiClient espClient;
 PubSubClient client(espClient);
 
 // Reed Switch and Relay
-#define REED_PIN 2  // GPIO1 on ESP-01 (TX pin; be cautious!)
+#define REED_PIN 2  // GPIO1 on ESP-01 (TX pin, use carefully)
 const int relayPin = 3;
 
+// MQTT Topics
 const char* status_topic = "door/status";
 const char* control_topic = "home/light1";
+const char* ack_topic = "door/ack";
 
 int lastState = HIGH;
+bool waitingForAck = false;
+unsigned long lastSentTime = 0;
+const unsigned long ackTimeout = 1000; // 3 seconds
+String lastSentStatus = "";
 
-// WiFi Setup
 void setup_wifi() {
   Serial.print("Connecting to Wi-Fi: ");
   Serial.println(ssid);
@@ -28,10 +33,17 @@ void setup_wifi() {
     delay(500);
     Serial.print(".");
   }
-  Serial.println("\\nWiFi connected");
+  Serial.println("\n✅ WiFi connected");
 }
 
-// MQTT Callback
+void sendStatus(String status) {
+  client.publish(status_topic, status.c_str(), true);
+  lastSentStatus = status;
+  lastSentTime = millis();
+  waitingForAck = true;
+  Serial.printf("📤 Sent status: %s\n", status.c_str());
+}
+
 void callback(char* topic, byte* payload, unsigned int length) {
   String message;
   for (unsigned int i = 0; i < length; i++) {
@@ -45,19 +57,24 @@ void callback(char* topic, byte* payload, unsigned int length) {
       digitalWrite(relayPin, LOW);
     }
   }
+
+  if (String(topic) == ack_topic) {
+    if ((ltastSentStaus == "OPEN" && message == "ACK_OPEN") ||
+        (lastSentStatus == "CLOSED" && message == "ACK_CLOSED")) {
+      Serial.printf("✅ ACK received: %s\n", message.c_str());
+      waitingForAck = false;
+    }
+  }
 }
 
-// MQTT Reconnect
 void reconnect() {
   while (!client.connected()) {
     Serial.print("Attempting MQTT connection...");
-
-    // Generate a unique client ID using ESP chip ID
-    String clientId = "ESP8266_" + String(ESP.getChipId());
-
+    String clientId = "ESP8266Sender_" + String(ESP.getChipId());
     if (client.connect(clientId.c_str())) {
       Serial.println("connected");
-      client.subscribe(control_topic);  // Subscribe after connecting
+      client.subscribe(control_topic);
+      client.subscribe(ack_topic);
     } else {
       Serial.print("failed, rc=");
       Serial.print(client.state());
@@ -66,10 +83,12 @@ void reconnect() {
     }
   }
 }
+
 void setup() {
   Serial.begin(9600);
   pinMode(REED_PIN, INPUT_PULLUP);
   pinMode(relayPin, OUTPUT);
+  digitalWrite(relayPin, LOW);
 
   setup_wifi();
   client.setServer(mqtt_server, mqtt_port);
@@ -86,7 +105,12 @@ void loop() {
   if (currentState != lastState) {
     lastState = currentState;
     String status = (currentState == LOW) ? "OPEN" : "CLOSED";
-    client.publish(status_topic, status.c_str(), true);
+    sendStatus(status);
+  }
+
+  if (waitingForAck && (millis() - lastSentTime > ackTimeout)) {
+    Serial.println("⚠️ ACK timeout, resending status");
+    sendStatus(lastSentStatus);
   }
 
   delay(100);
