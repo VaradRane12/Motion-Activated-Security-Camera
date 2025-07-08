@@ -67,7 +67,7 @@ pip3 install -r requirements.txt
 - **Transistor (2N2222A)** is used to drive relays safely
 
 Full schematic diagram :
-![Rasbperrypi setup](Schematic_Home-Automation_2025-06-23/Raspberrypi_Motion_Sensor.png)
+![Rasbperrypi setup](Schematic_Home-Automation_2025-06-23/Raspberypi_Motion_Sensor.png)
 ![DoorBell extender Schematic](Schematic_Home-Automation_2025-06-23/DoorBell_Control.png)
 ![Light Control Schematic](Schematic_Home-Automation_2025-06-23/Light_and_reed_switch_Control.png)
 
