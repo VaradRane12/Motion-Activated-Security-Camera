@@ -1,6 +1,6 @@
 # Motion‑Activated Security Camera
 
-A DIY **motion-triggered surveillance system** using **Raspberry Pi** and **NodeMCU**. Captures video/images on motion, uploads to AWS or stores locally, and is controlled through a web dashboard using Flask. Secured remote access via **Cloudflare Tunnel**.
+A DIY **motion-triggered surveillance system** using **Raspberry Pi** and **Esp-01**. Captures video/images on motion, uploads to AWS or stores locally, and is controlled through a web dashboard using Flask. Secured remote access via **Cloudflare Tunnel**.
 
 ---
 
@@ -9,7 +9,7 @@ A DIY **motion-triggered surveillance system** using **Raspberry Pi** and **Node
 - Motion-triggered video/image capture
 - Flask web interface (accessible remotely)
 - AWS S3 integration for cloud storage
-- NodeMCU-based relay logic for:
+- Esp-01-based relay logic for:
   - Light automation
   - Remote doorbell
 - Timed light switch control
@@ -23,7 +23,7 @@ A DIY **motion-triggered surveillance system** using **Raspberry Pi** and **Node
 ```bash
 Motion-Activated-Security-Camera/
 ├── flask/                  # Flask backend for UI and API endpoints
-├── nodemcu/                # NodeMCU firmware code (PIR sensor, light, doorbell)
+├── ESP_CODES/                # Esp-01 firmware code (PIR sensor, light, doorbell)
 ├── script.py               # Core script: motion detection and camera logic
 ├── Light_timed_switch.py  # Controls light with a time-based switch
 ├── requirements.txt        # List of required Python packages
@@ -34,7 +34,7 @@ Motion-Activated-Security-Camera/
 
 ### Hardware
 - Raspberry Pi (with PiCamera2)
-- NodeMCU (ESP8266)
+- Esp-01 (ESP8266)
 - PIR Motion Sensor
 - Relay modules
 - 2N2222A BJT transistors (for relay switching)
@@ -63,7 +63,7 @@ pip3 install -r requirements.txt
 ### Hardware & Schematics
 
 - Connected to **Raspberry Pi GPIO**
-- **Light & Doorbell Relay** → Controlled via **NodeMCU GPIOs**
+- **Light & Doorbell Relay** → Controlled via **Esp-01 GPIOs**
 - **Transistor (2N2222A)** is used to drive relays safely
 
 Full schematic diagram :
@@ -115,30 +115,30 @@ python3 Light_timed_switch.py
 ```
 #### &nbsp; Hardware Requirements
 
-- **NodeMCU ESP8266** – Receives the control signal and drives the relay
+- **Esp-01 ESP8266** – Receives the control signal and drives the relay
 - **Relay Module** – Used to switch the AC light ON/OFF
-- **BJT (e.g., 2N2222A or BC547)** – Acts as a switch to safely drive the relay from the NodeMCU's GPIO
-- **External Power Source** – Required if the relay module is not compatible with 3.3V (NodeMCU GPIO voltage)
+- **BJT (e.g., 2N2222A or BC547)** – Acts as a switch to safely drive the relay from the Esp-01's GPIO
+- **External Power Source** – Required if the relay module is not compatible with 3.3V (Esp-01 GPIO voltage)
 
-📌 Ensure proper current limiting resistors between NodeMCU and BJT base, and isolate the relay circuit as needed for safety.
+📌 Ensure proper current limiting resistors between Esp-01 and BJT base, and isolate the relay circuit as needed for safety.
 
-### 5. Flash NodeMCU
+### 5. Flash Esp-01
 
 Use **Arduino IDE** or **PlatformIO** to flash the firmware.
 
-1. Open the code inside the `nodemcu/` directory.
+1. Open the code inside the `Esp-01/` directory.
 2. Update the following in the source file:
    - **Wi-Fi SSID & Password**
    - **Flask server IP address** and API endpoints
 
 ---
 
-#### NodeMCU Handles:
+#### Esp-01 Handles:
 
 - **Light Toggle** via Relay Module
 - **Doorbell Trigger** via Relay/Buzzer
 
-Make sure to select the correct board (**NodeMCU 1.0 (ESP-12E Module)**) and port in the Arduino IDE before flashing.
+Make sure to select the correct board (**Esp-01 1.0 (ESP-12E Module)**) and port in the Arduino IDE before flashing.
 
 ### 6. AWS S3 Setup (Optional)
 
@@ -197,7 +197,7 @@ cloudflared tunnel create cam-tunnel
 
 - **Pause/Resume** motion detection
 - **Trigger Doorbell** manually
-- **Toggle or Schedule Light** (via NodeMCU)
+- **Toggle or Schedule Light** (via Esp-01)
 - **View Camera Feed** (if live feed option is implemented)
 
 > Designed for quick access and remote control of your home security system.
