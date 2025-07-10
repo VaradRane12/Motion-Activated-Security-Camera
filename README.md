@@ -209,25 +209,25 @@ cloudflared tunnel create cam-tunnel
 # Smart Doorbell & Light Control System
 
 ## Full System View
-![Full Doorbell](Full_doorbell.jpg)
+![Full Doorbell](photos/Full_doorbell.jpg)
 
 ## Doorbell Module
-![Doorbell Module](doorbell_module.jpg)
+![Doorbell Module](photos/doorbell_module.jpg)
 
 ## Light Control System
-![Light Control](light_control.jpg)
+![Light Control](photos/light_control.jpg)
 
 ## Internal Module
-![Module](module.jpg)
+![Module](photos/module.jpg)
 
 ## Installed Module
-![Module Installed](module_installed.jpg)
+![Module Installed](photos/module_installed.jpg)
 
 ## Soldering Process
-![Soldering](soldering.jpg)
+![Soldering](photos/soldering.jpg)
 
 ## Web Dashboard
-![Website](website.png)
+![Website](photos/website.png)
 
 ---
 
