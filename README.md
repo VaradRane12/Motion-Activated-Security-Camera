@@ -206,6 +206,28 @@ cloudflared tunnel create cam-tunnel
 > Designed for quick access and remote control of your home security system.
 
 ## Screenshots/Photos
+# Smart Doorbell & Light Control System
+
+## Full System View
+<img src="photos/Full_doorbell.jpg" alt="Full Doorbell" width="400"/>
+
+## Doorbell Module
+<img src="photos/doorbell_module.jpg" alt="Doorbell Module" width="400"/>
+
+## Light Control System
+<img src="photos/light_control.jpg" alt="Light Control" width="400"/>
+
+## Internal Module
+<img src="photos/module.jpg" alt="Module" width="400"/>
+
+## Installed Module
+<img src="photos/module_installed.jpg" alt="Module Installed" width="400"/>
+
+## Soldering Process
+<img src="photos/soldering.jpg" alt="Soldering" width="400"/>
+
+## Web Dashboard
+<img src="photos/website.png" alt="Website" width="400"/>
 
 ---
 
