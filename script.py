@@ -29,8 +29,25 @@ load_dotenv()
 WEBHOOK_INFO = os.getenv("DISCORD_WEBHOOK_INFO")
 WEBHOOK_ERROR = os.getenv("DISCORD_WEBHOOK_ERROR")
 WEBHOOK_GENERAL = os.getenv("DISCORD_WEBHOOK_GENERAL")
+WEBHOOK_VIDEOS = os.getenv("DISCORD_WEBHOOK_VIDEOS")
 
 # Discord webhook handler
+def send_to_discord_video(mp4_path, timestamp):
+    try:
+        if WEBHOOK_VIDEOS and os.path.getsize(mp4_path) < 25 * 1024 * 1024:
+            with open(mp4_path, "rb") as f:
+                files = {"file": (f"{timestamp}.mp4", f, "video/mp4")}
+                data = {"content": f"📹 Motion video: `{timestamp}`"}
+                response = requests.post(WEBHOOK_VIDEOS, data=data, files=files, timeout=10)
+                if response.status_code != 204:
+                    logger.warning(f"Discord video upload failed: {response.text}")
+                else:
+                    logger.info(f"Video sent to Discord webhook: {timestamp}")
+        else:
+            logger.warning(f"Video too large or webhook missing: {mp4_path}")
+    except Exception as e:
+        logger.error(f"Failed to send video to Discord: {e}")
+
 class DiscordHandler(logging.Handler):
     def __init__(self, webhook_url, level=logging.INFO):
         super().__init__(level)
@@ -168,6 +185,8 @@ def convert_and_upload(h264_path, timestamp):
         for file in glob.glob("../Desktop/offline_storage/*.mp4"):
             s3_key = f"motion_videos/{os.path.basename(file)}"
             s3_client.upload_file(file, bucket_name, s3_key)
+            send_to_discord_video(file, timestamp)
+
             os.remove(file)
             logger.info(f"Uploaded from offline: {file}")
             print(f"Uploaded from offline: {file}")
@@ -175,6 +194,8 @@ def convert_and_upload(h264_path, timestamp):
         s3_key = f"motion_videos/{timestamp}.mp4"
         s3_client.upload_file(mp4_path, bucket_name, s3_key)
         os.remove(mp4_path)
+        send_to_discord_video(mp4_path, timestamp)
+
         logger.info(f"Uploaded: {s3_key}")
         print(f"Uploaded: {s3_key}")
     except Exception as e:
