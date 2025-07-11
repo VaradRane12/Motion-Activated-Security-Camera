@@ -193,8 +193,9 @@ def convert_and_upload(h264_path, timestamp):
 
         s3_key = f"motion_videos/{timestamp}.mp4"
         s3_client.upload_file(mp4_path, bucket_name, s3_key)
-        os.remove(mp4_path)
         send_to_discord_video(mp4_path, timestamp)
+
+        os.remove(mp4_path)
 
         logger.info(f"Uploaded: {s3_key}")
         print(f"Uploaded: {s3_key}")
