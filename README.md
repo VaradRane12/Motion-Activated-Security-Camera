@@ -57,7 +57,6 @@ Install Python dependencies:
 pip3 install -r requirements.txt
 ```
 ---
-
 ## Setup Instructions
 
 ### Hardware & Schematics
@@ -123,7 +122,7 @@ python3 Light_timed_switch.py
 - **BJT (e.g., 2N2222A or BC547)** – Acts as a switch to safely drive the relay from the Esp-01's GPIO
 - **External Power Source** – Required if the relay module is not compatible with 3.3V (Esp-01 GPIO voltage)
 
-📌 Ensure proper current limiting resistors between Esp-01 and BJT base, and isolate the relay circuit as needed for safety.
+NOTE: Ensure proper current limiting resistors between Esp-01 and BJT base, and isolate the relay circuit as needed for safety.
 
 ### 5. Flash Esp-01
 
