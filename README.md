@@ -5,7 +5,6 @@ A DIY **motion-triggered surveillance system** using **Raspberry Pi** and **Esp-
 ---
 
 ## Features
-
 - Motion-triggered video/image capture
 - Flask web interface (accessible remotely)
 - AWS S3 integration for cloud storage
