@@ -157,7 +157,7 @@ motion_config = picam2.create_video_configuration(
 
 record_config = picam2.create_video_configuration(
     main={"size": (640, 480), "format": "RGB888"},
-    transform=Transform(hflip=1, vflip=1),
+    transform=Transform(hflip=0, vflip=1),
     controls={"FrameRate": 15}
 )
 
@@ -218,7 +218,10 @@ record_duration = 60
 cooldown_after_recording = 3
 last_motion_time = 0
 motion_threshold_area = 1000
-
+def is_night():
+    # Example: consider night between 19:00 (7 PM) and 06:00 (6 AM)
+    hour = datetime.now().hour
+    return hour >= 19 or hour < 6
 while True:
     if os.path.exists(PAUSE_FLAG_PATH):
         print("Motion detection paused.")
@@ -228,11 +231,16 @@ while True:
     yuv_buffer = picam2.capture_buffer("lores")
     yuv = np.frombuffer(yuv_buffer, dtype=np.uint8).reshape((240 * 3 // 2, 320))
     frame = cv2.cvtColor(yuv, cv2.COLOR_YUV2BGR_I420)
+
+    # Invert frame colors at night
+    if is_night():
+        frame = cv2.bitwise_not(frame)
+
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     gray = cv2.GaussianBlur(gray, (21, 21), 0)
     current_time = time.time()
 
-    if last_frame is None:
+    if last_frame is None:   
         last_frame = gray
         continue
 
