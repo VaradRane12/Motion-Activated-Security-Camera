@@ -69,7 +69,40 @@ Full schematic diagram :
 ![DoorBell extender Schematic](Schematic_Home-Automation_2025-06-23/DoorBell_Control.png)
 ![Light Control Schematic](Schematic_Home-Automation_2025-06-23/Light_and_reed_switch_Control.png)
 
+## AWS S3 Setup (Cloud Storage)
 
+This project supports **automatic upload of captured videos/images to AWS S3** for cloud storage and remote access.  
+
+Follow these steps to set it up:
+
+### 1. Create an AWS Account
+- Go to [AWS Signup](https://aws.amazon.com/) and create a free account.  
+- Log in to the **AWS Management Console**.  
+
+### 2. Create an S3 Bucket
+1. In the AWS console, search for **S3** and open it.  
+2. Click **Create bucket**.  
+3. Enter a **unique bucket name** (e.g., `my-security-cam-bucket`).  
+4. Select your **AWS Region** (e.g., `ap-south-1`).  
+5. Keep the default settings and click **Create bucket**.  
+
+### 4. Create an IAM User (for Programmatic Access)
+1. Go to **IAM** in the AWS console.  
+2. Click **Users → Add users**.  
+3. Enter a username (e.g., `cam-upload-user`).  
+4. Enable **Programmatic access**.  
+5. Attach policy: **AmazonS3FullAccess** (or create a custom policy for stricter control).  
+6. Complete setup and download the `.csv` file with your **Access Key ID** and **Secret Access Key**.  
+
+### 5. Configure Environment Variables
+Create a `.env` file in your project root and add:  
+
+```ini
+AWS_ACCESS_KEY_ID=your_access_key_id
+AWS_SECRET_ACCESS_KEY=your_secret_access_key
+BUCKET_NAME=your_bucket_name
+REGION_NAME=ap-south-1
+```
 ### 2. Flask Web Server
 
 Run the Flask server on your Raspberry Pi:
