@@ -8,7 +8,7 @@ response = s3_client.list_buckets()
 
 for bu in response["Buckets"]:
     print(bu)
-
+1
 
 response = s3_client.list_objects_v2(Bucket = 'motion-camera-storage')
 
